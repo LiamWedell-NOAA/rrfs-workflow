@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -16,7 +16,7 @@
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/link_fix.sh
+. $USHdir/link_fix.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -67,6 +67,8 @@ nprocs=$(( NNODES_MAKE_SFC_CLIMO * PPN_MAKE_SFC_CLIMO ))
 #-----------------------------------------------------------------------
 #
 # Create the namelist that the sfc_climo_gen code will read in.
+#
+# Question: Should this instead be created from a template file?
 #
 #-----------------------------------------------------------------------
 #
@@ -152,12 +154,12 @@ esac
 export pgm="sfc_climo_gen"
 . prep_step
 
-$APRUN $EXECrrfs/$pgm >>$pgmout 2>errfile
+$APRUN $EXECdir/$pgm >>$pgmout 2>errfile
 export err=$?; err_chk
 #
 #-----------------------------------------------------------------------
 #
-# Move output files out of the run directory.
+# Move output files out of the temporary directory.
 #
 #-----------------------------------------------------------------------
 #

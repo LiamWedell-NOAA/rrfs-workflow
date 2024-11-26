@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -47,6 +47,35 @@ This is the ex-script for the task that runs the bufr-sounding
 #
 #-----------------------------------------------------------------------
 #
+# Specify the set of valid argument names for this script/function.  
+# Then process the arguments provided to this script/function (which 
+# should consist of a set of name-value pairs of the form arg1="value1",
+# etc).
+#
+#-----------------------------------------------------------------------
+#
+valid_args=( \
+"cdate" \
+"run_dir" \
+"nwges_dir" \
+"fhr" \
+"tmmark" \
+"cycle_type" \
+)
+process_args valid_args "$@"
+#
+#-----------------------------------------------------------------------
+#
+# For debugging purposes, print out values of arguments passed to this
+# script.  Note that these will be printed out only if VERBOSE is set to
+# TRUE.
+#
+#-----------------------------------------------------------------------
+#
+print_input_args valid_args
+#
+#-----------------------------------------------------------------------
+#
 # Set environment
 #
 #-----------------------------------------------------------------------
@@ -57,8 +86,8 @@ ulimit -a
 case $MACHINE in
 
   "WCOSS2")
-    ncores=$(( NNODES_BUFRSND*PPN_BUFRSND ))
-    APRUNC="mpiexec -n ${ncores} -ppn ${PPN_BUFRSND}"
+    ncores=$(( NNODES_RUN_BUFRSND*PPN_RUN_BUFRSND ))
+    APRUNC="mpiexec -n ${ncores} -ppn ${PPN_RUN_BUFRSND}"
     APRUNS="time"
     ;;
 
@@ -93,13 +122,21 @@ esac
 #
 #-----------------------------------------------------------------------
 #
-# Get the cycle date and hour (in formats of yyyymmdd and hh, respectively)
-# from CDATE.
+# Remove any files from previous runs.
 #
 #-----------------------------------------------------------------------
 #
-yyyymmdd=${CDATE:0:8}
-hh=${CDATE:8:2}
+rm -f fort.*
+#
+#-----------------------------------------------------------------------
+#
+# Get the cycle date and hour (in formats of yyyymmdd and hh, respectively)
+# from cdate.
+#
+#-----------------------------------------------------------------------
+#
+yyyymmdd=${cdate:0:8}
+hh=${cdate:8:2}
 cyc=$hh
 #
 #-----------------------------------------------------------------------
@@ -109,23 +146,37 @@ cyc=$hh
 #
 #-----------------------------------------------------------------------
 #
+PARMfv3=${FIX_BUFRSND}  #/lfs/h2/emc/lam/noscrub/emc.lam/FIX_RRFS/bufrsnd
+
+DATA=$bufrsnd_dir
+
 mkdir -p $DATA/bufrpost
 cd $DATA/bufrpost
 
-cpreq -p ${FIX_BUFRSND}/${PREDEF_GRID_NAME}/rrfs_profdat regional_profdat
+export tmmark=tm00
+
+cp $PARMfv3/${PREDEF_GRID_NAME}/rrfs_profdat regional_profdat
 
 OUTTYP=netcdf
 
 model=FV3S
 
 INCR=01
+
+#FHRLIM set to 00 for hourly RTMA cycles
+
+if [[ "${NET}" = "RTMA"* ]]; then
+FHRLIM=00
+else
 FHRLIM=60
+fi   
+
 
 let NFILE=1
 
 START_DATE=$(echo "${CDATE}" | sed 's/\([[:digit:]]\{2\}\)$/ \1/')
 
-PDY=$CDATE
+PDY=$cdate
 
 YYYY=`echo $PDY | cut -c1-4`
 MM=`echo $PDY | cut -c5-6`
@@ -158,6 +209,7 @@ fi
 
 echo starting with fhr $fhr
 
+INPUT_DATA=$run_dir
 ########################################################
 #  set to 15 minute output for subhour
 if [ "${NSOUT_MIN}" = "0" ]; then
@@ -253,7 +305,7 @@ ln -sf ./itag                              fort.11
   export pgm="rrfs_bufr.exe"
   . prep_step
 
-  ${APRUNC} ${EXECrrfs}/$pgm >>$pgmout 2>errfile
+  ${APRUNC} ${EXECdir}/$pgm >>$pgmout 2>errfile
   export err=$?; err_chk
   mv errfile errfile_rrfs_bufr
 
@@ -281,8 +333,8 @@ cd $DATA
 
 export pgm=rrfs_sndp
 
-cpreq -p ${FIX_BUFRSND}/regional_sndp.parm.mono $DATA/regional_sndp.parm.mono
-cpreq -p ${FIX_BUFRSND}/regional_bufr.tbl $DATA/regional_bufr.tbl
+cp $PARMfv3/regional_sndp.parm.mono $DATA/regional_sndp.parm.mono
+cp $PARMfv3/regional_bufr.tbl $DATA/regional_bufr.tbl
 
 ln -sf $DATA/regional_sndp.parm.mono fort.11
 ln -sf $DATA/regional_bufr.tbl       fort.32
@@ -304,7 +356,7 @@ echo "$nlev $NSTAT $FCST_LEN_HRS" > itag
 export pgm="rrfs_sndp.exe"
 . prep_step
 
-${APRUNS} ${EXECrrfs}/$pgm < itag >>$pgmout 2>errfile
+${APRUNS} ${EXECdir}/$pgm < itag >>$pgmout 2>errfile
 export err=$?; err_chk
 mv errfile errfile_rrfs_sndp
 
@@ -343,7 +395,7 @@ echo "before stnmlist.exe"
 export pgm="rrfs_stnmlist.exe"
 . prep_step
 
-${APRUNS} ${EXECrrfs}/$pgm < stnmlist_input >>$pgmout 2>errfile
+${APRUNS} ${EXECdir}/$pgm < stnmlist_input >>$pgmout 2>errfile
 export err=$?; err_chk
 mv errfile errfile_rrfs_stnmlist
 
@@ -356,11 +408,19 @@ cd ${COMOUT}/bufr.${cyc}
 # Tar and gzip the individual bufr files and send them to /com
 tar -cf - . | /usr/bin/gzip > ../rrfs.t${cyc}z.bufrsnd.tar.gz
 
-cpreq -p $GEMPAKrrfs/fix/snrrfs.prm snrrfs.prm
-cpreq -p $GEMPAKrrfs/fix/sfrrfs.prm_aux sfrrfs.prm_aux
-cpreq -p $GEMPAKrrfs/fix/sfrrfs.prm sfrrfs.prm
+GEMPAKrrfs=/lfs/h2/emc/lam/noscrub/emc.lam/FIX_RRFS/gempak
+cp $GEMPAKrrfs/fix/snrrfs.prm snrrfs.prm
+err1=$?
+cp $GEMPAKrrfs/fix/sfrrfs.prm_aux sfrrfs.prm_aux
+err2=$?
+cp $GEMPAKrrfs/fix/sfrrfs.prm sfrrfs.prm
+err3=$?
 
 mkdir -p $COMOUT/gempak
+
+if [ $err1 -ne 0 -o $err2 -ne 0 -o $err3 -ne 0 ]; then
+  err_exit "Missing GEMPAK BUFR tables"
+fi
 
 #  Set input file name.
 INFILE=$COMOUT/rrfs.t${cyc}z.class1.bufr

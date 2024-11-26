@@ -17,9 +17,10 @@ DO_SPINUP="TRUE"
 DO_POST_SPINUP="FALSE"
 DO_POST_PROD="TRUE"
 DO_RETRO="FALSE"
-DO_ANALYSIS_NONVARCLD="TRUE"
+DO_NONVAR_CLDANAL="TRUE"
 DO_ENVAR_RADAR_REF="TRUE"
 DO_SMOKE_DUST="FALSE"
+DO_REFL2TTEN="FALSE"
 RADARREFL_TIMELEVEL=(0)
 FH_DFI_RADAR="0.0,0.25,0.5"
 DO_SOIL_ADJUST="TRUE"
@@ -56,6 +57,7 @@ INITIAL_CYCLEDEF="${DATE_FIRST_CYCL}0300 ${DATE_LAST_CYCL}2300 12:00:00"
 BOUNDARY_CYCLEDEF="${DATE_FIRST_CYCL}0000 ${DATE_LAST_CYCL}2300 06:00:00"
 PROD_CYCLEDEF="00 01-05,07-11,13-17,19-23 ${CYCLEDAY} ${CYCLEMONTH} 2022 *"
 PRODLONG_CYCLEDEF="00 00,06,12,18 ${CYCLEDAY} ${CYCLEMONTH} 2022 *"
+#ARCHIVE_CYCLEDEF="${DATE_FIRST_CYCL}0700 ${DATE_LAST_CYCL}2300 24:00:00"
 if [[ $DO_SPINUP == "TRUE" ]] ; then
   SPINUP_CYCLEDEF="00 03-08,15-20 ${CYCLEDAY} ${CYCLEMONTH} 2022 *"
 fi
@@ -83,13 +85,15 @@ SOIL_SURGERY_time=2022020704
 
 regional_ensemble_option=5
 
-EXTRN_MDL_NAME_ICS="GFS"
-EXTRN_MDL_NAME_LBCS="GFS"
+EXTRN_MDL_NAME_ICS="FV3GFS"
+EXTRN_MDL_NAME_LBCS="FV3GFS"
 
 envir="para"
 
 NET="rrfs_a"
 TAG="rrfs_a_c13v32"
+ARCHIVEDIR="/1year/BMC/wrfruc/rrfs_dev1"
+NCL_REGION="conus"
 MODEL="rrfs_ac13"
 RUN="rrfs"
 
@@ -97,9 +101,9 @@ RUN="rrfs"
 
 STMP="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}/stmp"  # Path to directory STMP that mostly contains input files.
 PTMP="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}"  # Path to directory STMP that mostly contains input files.
-GESROOT="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}/nwges/${envir}/${NET}"  # Path to directory GESROOT that save boundary, cold initial, restart files
+NWGES="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}/nwges/${envir}/${NET}"  # Path to directory NWGES that save boundary, cold initial, restart files
 if [[ ${regional_ensemble_option} == "5" ]]; then
-  RRFSE_GESROOT="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}/nwges"  # Path to RRFSE directory GESROOT that mostly contains ensemble restart files for GSI hybrid.
+  RRFSE_NWGES="/lfs/h2/emc/stmp/emc.lam/rrfsx/${version}/nwges"  # Path to RRFSE directory NWGES that mostly contains ensemble restart files for GSI hybrid.
   NUM_ENS_MEMBERS=30     # FV3LAM ensemble size for GSI hybrid analysis
   CYCL_HRS_PRODSTART_ENS=( "19" )
   DO_ENVAR_RADAR_REF="TRUE"

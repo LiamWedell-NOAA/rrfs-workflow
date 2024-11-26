@@ -29,9 +29,11 @@ DO_SAVE_DA_OUTPUT="TRUE"
 DO_POST_SPINUP="FALSE"
 DO_POST_PROD="FALSE"
 DO_RETRO="TRUE"
-DO_ANALYSIS_NONVARCLD="TRUE"
+DO_NONVAR_CLDANAL="TRUE"
 #DO_ENVAR_RADAR_REF="TRUE"
 DO_SMOKE_DUST="FALSE"
+DO_PM_DA="FALSE"
+#DO_REFL2TTEN="FALSE"
 #RADARREFL_TIMELEVEL=(0)
 #FH_DFI_RADAR="0.0,0.25,0.5"
 #DO_SOIL_ADJUST="TRUE"
@@ -54,7 +56,7 @@ if [[ ${DO_ENSFCST} == "TRUE" ]] ; then
   EXPT_SUBDIR="rrfs_conus_enfcst"
   DO_SPINUP="FALSE"
   DO_SAVE_DA_OUTPUT="FALSE"
-  DO_ANALYSIS_NONVARCLD="FALSE"
+  DO_NONVAR_CLDANAL="FALSE"
   DO_POST_PROD="TRUE"
   DO_BUFRSND="TRUE"
 fi
@@ -95,6 +97,7 @@ BOUNDARY_CYCLEDEF="${DATE_FIRST_CYCL}0600 ${DATE_LAST_CYCL}2300 06:00:00"
 PROD_CYCLEDEF="${DATE_FIRST_CYCL}0000 ${DATE_LAST_CYCL}2300 01:00:00"
 PRODLONG_CYCLEDEF="00 01 01 01 2100 *"
 #RECENTER_CYCLEDEF="00 19 * 10 2022 *"
+#ARCHIVE_CYCLEDEF="${DATE_FIRST_CYCL}1500 ${DATE_LAST_CYCL}2300 24:00:00"
 if [[ ${DO_ENSFCST} == "TRUE" ]] ; then
   BOUNDARY_LEN_HRS="60"
   LBC_SPEC_INTVL_HRS="3"
@@ -136,18 +139,20 @@ WRTCMP_quantize_nsd="18"
 ## set up post
 OUTPUT_FH="1 -1"
 
-WTIME_FORECAST="00:30:00"
-WTIME_FORECAST_LONG="03:45:00"
-NNODES_ANALYSIS_GSI="1"
+WTIME_RUN_FCST="00:30:00"
+WTIME_RUN_FCST_LONG="03:45:00"
+NNODES_RUN_ANALYSIS="1"
 
 EXTRN_MDL_NAME_ICS="GDASENKF"
 EXTRN_MDL_NAME_LBCS="GEFS"
-GFS_FILE_FMT_ICS="netcdf"
-GFS_FILE_FMT_LBCS="grib2"
+FV3GFS_FILE_FMT_ICS="netcdf"
+FV3GFS_FILE_FMT_LBCS="grib2"
 EXTRN_MDL_SAVETYPE="GSL"
 
 envir="para"
 NET="rrfs_a"
+ARCHIVEDIR="/NCEPDEV/emc-meso/1year/emc.lam"
+NCL_REGION="conus"
 MODEL="RRFS_A"
 
 SPPINT=36
@@ -159,10 +164,13 @@ if [[ ${DO_ENSEMBLE}  == "TRUE" ]]; then
    DO_GSIOBSERVER="TRUE"
    DO_ENKFUPDATE="TRUE"
 #   DO_RECENTER="TRUE"
+   DO_ENS_GRAPHICS="FALSE"
    DO_ENKF_RADAR_REF="TRUE"
+   DO_ENSPOST="FALSE"
    DO_ENSINIT="TRUE"
 
    RADAR_REF_THINNING="2"
+   ARCHIVEDIR="/5year/BMC/wrfruc/rrfs_ens"
    CLEAN_OLDFCST_HRS="12"
    CLEAN_OLDSTMPPOST_HRS="12"
    cld_bld_hgt=0.0
@@ -172,17 +180,17 @@ if [[ ${DO_ENSEMBLE}  == "TRUE" ]]; then
    START_TIME_SPINUP="00:30:00"
    LAYOUT_X="11"
    LAYOUT_Y="32"
-   NNODES_FORECAST="6"
+   NNODES_RUN_FCST="6"
 
    NUM_ENS_MEMBERS_FCST=5
    if [[ ${DO_ENSFCST} == "TRUE" ]] ; then
      NUM_ENS_MEMBERS=${NUM_ENS_MEMBERS_FCST}
-     WTIME_FORECAST="04:45:00"
+     WTIME_RUN_FCST="04:45:00"
      WTIME_MAKE_LBCS="01:30:00"
 
      LAYOUT_X="31"
      LAYOUT_Y="32"
-     NNODES_FORECAST="16"
+     NNODES_RUN_FCST="16"
 
      DO_ENSFCST_MULPHY="TRUE"
      DO_SPP="TRUE"
@@ -193,10 +201,10 @@ if [[ ${DO_ENSEMBLE}  == "TRUE" ]]; then
      DO_RECENTER="TRUE"
 
    fi
-#   PPN_RECENTER="$(( ${NUM_ENS_MEMBERS} + 1 ))"
-#   NNODES_RECENTER="3"
-   PPN_RECENTER="128"
-   NNODES_RECENTER="10"
+#   PPN_RUN_RECENTER="$(( ${NUM_ENS_MEMBERS} + 1 ))"
+#   NNODES_RUN_RECENTER="3"
+   PPN_RUN_RECENTER="128"
+   NNODES_RUN_RECENTER="10"
 fi
 
 RUN_ensctrl="rrfs"
@@ -212,12 +220,12 @@ COMINgfs=""
 
 STMP="/lfs/h2/emc/stmp/emc.lam/rrfs/${version}"  # Path to directory STMP that mostly contains input files.
 PTMP="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}"  # Path to directory STMP that mostly contains input files.
-GESROOT="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory GESROOT that save boundary, cold initial, restart files
+NWGES="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory NWGES that save boundary, cold initial, restart files
 if [[ ${DO_ENSFCST} == "TRUE" ]] ; then
   STMP="/lfs/h2/emc/stmp/emc.lam/rrfs/${version}/enfcst"  # Path to directory STMP that mostly contains input files.
   PTMP="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}"  # Path to directory STMP that mostly contains input files.
-  GESROOT="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory GESROOT that save boundary, cold initial, restart files
+  NWGES="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory NWGES that save boundary, cold initial, restart files
 fi
 ENSCTRL_STMP="/lfs/h2/emc/stmp/emc.lam/rrfs/${version}"  # Path to directory STMP that mostly contains control input files for ensemble recentering.
 ENSCTRL_PTMP="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}"  # Path to directory STMP that mostly contains control input files for ensemble recentering.
-ENSCTRL_GESROOT="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory STMP that mostly contains control input files for ensemble recentering.
+ENSCTRL_NWGES="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges"  # Path to directory STMP that mostly contains control input files for ensemble recentering.

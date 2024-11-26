@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -101,7 +101,7 @@ set -u
 default_modules_dir="$HOMErrfs/modulefiles"
 machine=$(echo_lowercase $MACHINE)
 if [ "${WORKFLOW_MANAGER}" != "ecflow" ]; then
-  source "${USHrrfs}/etc/lmod-setup.sh" ${machine}
+  source "${USHdir}/etc/lmod-setup.sh" ${machine}
 fi
 module use "${default_modules_dir}"
 

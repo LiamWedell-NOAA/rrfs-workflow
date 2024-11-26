@@ -30,8 +30,8 @@ function source_util_funcs() {
 #
 #-----------------------------------------------------------------------
 #
-  local USHrrfs="${scrfunc_dir}"
-  local bashutils_dir="${USHrrfs}/bash_utils"
+  local USHdir="${scrfunc_dir}"
+  local bashutils_dir="${USHdir}/bash_utils"
 #
 #-----------------------------------------------------------------------
 #

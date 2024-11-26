@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -42,18 +42,43 @@ print_info_msg "
 Entering script:  \"${scrfunc_fn}\"
 In directory:     \"${scrfunc_dir}\"
 
-This is the ex-script for the task that saves restart files to nwges.
+This is the ex-script for the task that runs the post-processor (UPP) on
+the output files corresponding to a specified forecast hour.
 ========================================================================"
 #
 #-----------------------------------------------------------------------
 #
-# Get the cycle date and hour (in formats of yyyymmdd and hh, respectively)
-# from CDATE.
+# Specify the set of valid argument names for this script/function.  
+# Then process the arguments provided to this script/function (which 
+# should consist of a set of name-value pairs of the form arg1="value1",
+# etc).
 #
 #-----------------------------------------------------------------------
 #
-yyyymmdd=${CDATE:0:8}
-hh=${CDATE:8:2}
+valid_args=( \
+"cdate" \
+)
+process_args valid_args "$@"
+#
+#-----------------------------------------------------------------------
+#
+# For debugging purposes, print out values of arguments passed to this
+# script.  Note that these will be printed out only if VERBOSE is set to
+# TRUE.
+#
+#-----------------------------------------------------------------------
+#
+print_input_args valid_args
+#
+#-----------------------------------------------------------------------
+#
+# Get the cycle date and hour (in formats of yyyymmdd and hh, respectively)
+# from cdate.
+#
+#-----------------------------------------------------------------------
+#
+yyyymmdd=${cdate:0:8}
+hh=${cdate:8:2}
 cyc=$hh
 
 save_time=$( date --utc --date "${yyyymmdd} ${hh} UTC + ${fhr} hours" "+%Y%m%d%H" )
@@ -69,8 +94,8 @@ save_hh=${save_time:8:2}
 #
 #-----------------------------------------------------------------------
 #
-run_blending=${GESROOT}/${RUN}.${PDY}/${cyc}/${mem_num}/run_blending
-run_ensinit=${GESROOT}/${RUN}.${PDY}/${cyc}/${mem_num}/run_ensinit
+run_blending=${NWGES_BASEDIR}/${cdate}/run_blending
+run_ensinit=${NWGES_BASEDIR}/${cdate}/run_ensinit
 if [[ ${CYCLE_SUBTYPE} == "ensinit" && -e $run_blending ]]; then
    echo "clean exit ensinit, blending used instead of ensinit."
    exit 0
@@ -97,22 +122,22 @@ fi
 
 if_save_input=FALSE
 
-if [ ! -r ${NWGES_DIR}/INPUT/gfs_ctrl.nc ]; then
-  cp $DATA/INPUT/gfs_ctrl.nc ${NWGES_DIR}/INPUT/gfs_ctrl.nc
+if [ ! -r ${nwges_dir}/INPUT/gfs_ctrl.nc ]; then
+  cp $run_dir/INPUT/gfs_ctrl.nc ${nwges_dir}/INPUT/gfs_ctrl.nc
   if_save_input=TRUE
 fi
 
-if [ -r "$DATA/RESTART/${restart_prefix}.coupler.res" ]; then
+if [ -r "$run_dir/RESTART/${restart_prefix}.coupler.res" ]; then
   if [ "${IO_LAYOUT_Y}" = "1" ]; then
     for file in ${filelistn}; do
-      mv $DATA/RESTART/${restart_prefix}.${file} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}
+      mv $run_dir/RESTART/${restart_prefix}.${file} ${nwges_dir}/RESTART/${restart_prefix}.${file}
     done
   else
     for file in ${filelistn}; do
       for ii in ${list_iolayout}
       do
         iii=$(printf %4.4i $ii)
-        mv $DATA/RESTART/${restart_prefix}.${file}.${iii} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}.${iii}
+        mv $run_dir/RESTART/${restart_prefix}.${file}.${iii} ${nwges_dir}/RESTART/${restart_prefix}.${file}.${iii}
       done
     done
   fi
@@ -126,10 +151,10 @@ if [ -r "$DATA/RESTART/${restart_prefix}.coupler.res" ]; then
 if [[ ${DO_GLM_FED_DA} = TRUE && ${DO_ENSEMBLE} != TRUE ]]; then
   export restart_prefix=${restart_prefix} 
   export PREP_MODEL=2
-  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
-  python -u ${HOMErrfs}/scripts/exrrfs_process_lightning.py
-  ncks -A -C -v flash_extent_density ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc
-  rm ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
+  python -u ${SCRIPTSdir}/exrrfs_process_glmfed.py
+  ncks -A -C -v flash_extent_density ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc
+  rm ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
 fi
 #
 #-----------------------------------------------------------------------
@@ -142,10 +167,10 @@ if [[ ${DO_ENSEMBLE} = TRUE && ${fhr} -eq 1 && ${PREP_MODEL_FOR_FED} = TRUE ]]; 
   export restart_prefix=${restart_prefix}  
   export PREP_MODEL=2
 
-  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
-  python -u ${HOMErrfs}/scripts/exrrfs_process_lightning.py
-  ncks -A -C -v flash_extent_density ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc
-  rm ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
+  python -u ${SCRIPTSdir}/exrrfs_process_glmfed.py
+  ncks -A -C -v flash_extent_density ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc
+  rm ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
 fi
 #
 #-----------------------------------------------------------------------
@@ -155,9 +180,9 @@ fi
 #-----------------------------------------------------------------------
 #
   for file in ${filelist}; do
-    mv $DATA/RESTART/${restart_prefix}.${file} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}
+    mv $run_dir/RESTART/${restart_prefix}.${file} ${nwges_dir}/RESTART/${restart_prefix}.${file}
   done
-  echo " ${fhr} forecast from ${yyyymmdd}${hh} is ready " #> ${NWGES_DIR}/RESTART/restart_done_f${fhr}
+  echo " ${fhr} forecast from ${yyyymmdd}${hh} is ready " #> ${nwges_dir}/RESTART/restart_done_f${fhr}
 else
 
   FCST_LEN_HRS_thiscycle=${FCST_LEN_HRS}
@@ -172,17 +197,17 @@ else
   fi
   print_info_msg "The forecast length for cycle (\"${hh}\") is (\"${FCST_LEN_HRS_thiscycle}\")."
 
-  if [ -r "$DATA/RESTART/${restart_prefix}.coupler.res" ] && ([ ${fhr} -eq ${FCST_LEN_HRS_thiscycle} ] || [ "${CYCLE_SUBTYPE}" = "ensinit" ]); then
+  if [ -r "$run_dir/RESTART/${restart_prefix}.coupler.res" ] && ([ ${fhr} -eq ${FCST_LEN_HRS_thiscycle} ] || [ "${CYCLE_SUBTYPE}" = "ensinit" ]); then
     if [ "${IO_LAYOUT_Y}" = "1" ]; then
       for file in ${filelistn}; do
-        mv $DATA/RESTART/${file} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}
+        mv $run_dir/RESTART/${file} ${nwges_dir}/RESTART/${restart_prefix}.${file}
       done
     else
       for file in ${filelistn}; do
         for ii in ${list_iolayout}
         do
           iii=$(printf %4.4i $ii)
-          mv $DATA/RESTART/${file}.${iii} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}.${iii}
+          mv $run_dir/RESTART/${file}.${iii} ${nwges_dir}/RESTART/${restart_prefix}.${file}.${iii}
         done
       done
     fi
@@ -197,13 +222,13 @@ if [[ ${DO_GLM_FED_DA} = TRUE && ${DO_ENSEMBLE} != TRUE ]]; then
   export restart_prefix=${restart_prefix} 
   export PREP_MODEL=2
   time_0=`date +%s`
-  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
   time_1=`date +%s`
-  python -u ${HOMErrfs}/scripts/exrrfs_process_lightning.py
+  python -u ${SCRIPTSdir}/exrrfs_process_glmfed.py
   time_2=`date +%s`
-  ncks -A -C -v flash_extent_density ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc
+  ncks -A -C -v flash_extent_density ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc
   time_3=`date +%s`
-  rm ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  rm ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
   time_4=`date +%s`
   echo ncaps2 execution time was `expr $time_1 - $time_0` s.
   echo python execution time was `expr $time_2 - $time_1` s.
@@ -222,13 +247,13 @@ if [[ ${DO_ENSEMBLE} = TRUE && ${fhr} -eq 1 && ${PREP_MODEL_FOR_FED} = TRUE ]]; 
   export PREP_MODEL=2
 
   time_0=`date +%s`
-  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  ncap2 -O -v -s 'flash_extent_density=ref_f3d' ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
   time_1=`date +%s`
-  python -u ${HOMErrfs}/scripts/exrrfs_process_lightning.py
+  python -u ${SCRIPTSdir}/exrrfs_process_glmfed.py
   time_2=`date +%s`
-  ncks -A -C -v flash_extent_density ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc ${NWGES_DIR}/RESTART/${restart_prefix}.phy_data.nc
+  ncks -A -C -v flash_extent_density ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc ${nwges_dir}/RESTART/${restart_prefix}.phy_data.nc
   time_3=`date +%s`
-  rm ${NWGES_DIR}/RESTART/${restart_prefix}.tmp.nc
+  rm ${nwges_dir}/RESTART/${restart_prefix}.tmp.nc
   time_4=`date +%s`
   echo ncaps2 execution time was `expr $time_1 - $time_0` s.
   echo python execution time was `expr $time_2 - $time_1` s.
@@ -243,9 +268,9 @@ fi
 #-----------------------------------------------------------------------
 #
     for file in ${filelist}; do
-       mv $DATA/RESTART/${file} ${NWGES_DIR}/RESTART/${restart_prefix}.${file}
+       mv $run_dir/RESTART/${file} ${nwges_dir}/RESTART/${restart_prefix}.${file}
     done
-    echo " ${fhr} forecast from ${yyyymmdd}${hh} is ready " #> ${NWGES_DIR}/RESTART/restart_done_f${fhr}
+    echo " ${fhr} forecast from ${yyyymmdd}${hh} is ready " #> ${nwges_dir}/RESTART/restart_done_f${fhr}
   else
     echo "This forecast hour does not need to save restart: ${yyyymmdd}${hh}f${fhr}"
   fi
@@ -257,12 +282,12 @@ fi
 #
 if [ "${CYCLE_TYPE}" = "prod" ] && [ "${CYCLE_SUBTYPE}" = "control" ]; then
   if [ "${IO_LAYOUT_Y}" = "1" ]; then
-    cp ${NWGES_DIR}/RESTART/${restart_prefix}.sfc_data.nc ${SURFACE_DIR}/${restart_prefix}.sfc_data.nc.${CDATE}
+    cp ${nwges_dir}/RESTART/${restart_prefix}.sfc_data.nc ${SURFACE_DIR}/${restart_prefix}.sfc_data.nc.${cdate}
   else
     for ii in ${list_iolayout}
     do
       iii=$(printf %4.4i $ii)
-      cp ${NWGES_DIR}/RESTART/${restart_prefix}.sfc_data.nc.${iii} ${SURFACE_DIR}/${restart_prefix}.sfc_data.nc.${CDATE}.${iii}
+      cp ${nwges_dir}/RESTART/${restart_prefix}.sfc_data.nc.${iii} ${SURFACE_DIR}/${restart_prefix}.sfc_data.nc.${cdate}.${iii}
     done
   fi
 fi
@@ -273,26 +298,26 @@ fi
 #
 if [ "${if_save_input}" = TRUE ]; then
   if [ "${DO_SAVE_INPUT}" = TRUE ]; then
-    if [ -r ${DATA}/INPUT/coupler.res ]; then  # warm start
+    if [ -r ${run_dir}/INPUT/coupler.res ]; then  # warm start
       if [ "${IO_LAYOUT_Y}" = "1" ]; then
         for file in ${filelistn}; do
-          cp $DATA/INPUT/${file} ${NWGES_DIR}/INPUT/${file}
+          cp $run_dir/INPUT/${file} ${nwges_dir}/INPUT/${file}
         done
       else
         for file in ${filelistn}; do
           for ii in ${list_iolayout}
           do
             iii=$(printf %4.4i $ii)
-           cp $DATA/INPUT/${file}.${iii} ${NWGES_DIR}/INPUT/${file}.${iii}
+           cp $run_dir/INPUT/${file}.${iii} ${nwges_dir}/INPUT/${file}.${iii}
           done
         done
       fi
       for file in ${filelist}; do
-        cp $DATA/INPUT/${file} ${NWGES_DIR}/INPUT/${file}
+        cp $run_dir/INPUT/${file} ${nwges_dir}/INPUT/${file}
       done
     else  # cold start
       for file in ${filelistcold}; do
-        cp $DATA/INPUT/${file} ${NWGES_DIR}/INPUT/${file}
+        cp $run_dir/INPUT/${file} ${nwges_dir}/INPUT/${file}
       done
     fi
   fi

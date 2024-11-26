@@ -36,7 +36,7 @@ local func_name="${FUNCNAME[0]}"
 #
 #-----------------------------------------------------------------------
 #
-USHrrfs="${scrfunc_dir}"
+USHdir="${scrfunc_dir}"
 #
 #-----------------------------------------------------------------------
 #
@@ -44,8 +44,8 @@ USHrrfs="${scrfunc_dir}"
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/source_util_funcs.sh
-. $USHrrfs/set_FV3nml_sfc_climo_filenames.sh
+. $USHdir/source_util_funcs.sh
+. $USHdir/set_FV3nml_sfc_climo_filenames.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -113,9 +113,9 @@ fi
 # if not, run Init.sh (otherwise, the workflow generation will fail)
 #-----------------------------------------------------------------------
 #
-if [[ ! -L ${USHrrfs}/../fix/.agent || ! -e ${USHrrfs}/../fix/.agent ]] \
-  && [ -e ${USHrrfs}/Init.sh ]; then
-    ${USHrrfs}/Init.sh
+if [[ ! -L ${USHdir}/../fix/.agent || ! -e ${USHdir}/../fix/.agent ]] \
+  && [ -e ${USHdir}/Init.sh ]; then
+    ${USHdir}/Init.sh
 fi
 #
 #-----------------------------------------------------------------------
@@ -129,7 +129,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/setup.sh
+. $USHdir/setup.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -153,9 +153,11 @@ WFLOW_XML_FP="$EXPTDIR/${WFLOW_XML_FN}"
 #
 ensmem_indx_name="\"\""
 uscore_ensmem_name="\"\""
+slash_ensmem_subdir="\"\""
 if [ "${DO_ENSEMBLE}" = "TRUE" ]; then
   ensmem_indx_name="mem"
-  uscore_ensmem_name="_m#${ensmem_indx_name}#"
+  uscore_ensmem_name="_mem#${ensmem_indx_name}#"
+  slash_ensmem_subdir="/mem#${ensmem_indx_name}#"
 fi
 
 settings="\
@@ -173,8 +175,10 @@ settings="\
   'partition_hpss': ${PARTITION_HPSS}
   'queue_hpss': ${QUEUE_HPSS}
   'partition_sfc_climo': ${PARTITION_SFC_CLIMO}
-  'partition_forecast': ${PARTITION_FORECAST}
-  'queue_forecast': ${QUEUE_FORECAST}
+  'partition_fcst': ${PARTITION_FCST}
+  'queue_fcst': ${QUEUE_FCST}
+  'partition_graphics': ${PARTITION_GRAPHICS}
+  'queue_graphics': ${QUEUE_GRAPHICS}
   'machine': ${MACHINE}
   'partition_analysis': ${PARTITION_ANALYSIS}
   'queue_analysis': ${QUEUE_ANALYSIS}
@@ -188,68 +192,90 @@ settings="\
   'make_grid_tn': ${MAKE_GRID_TN}
   'make_orog_tn': ${MAKE_OROG_TN}
   'make_sfc_climo_tn': ${MAKE_SFC_CLIMO_TN}
+  'get_extrn_ics_tn': ${GET_EXTRN_ICS_TN}
+  'get_extrn_lbcs_tn': ${GET_EXTRN_LBCS_TN}
+  'get_extrn_lbcs_long_tn': ${GET_EXTRN_LBCS_LONG_TN}
+  'get_gefs_lbcs_tn': ${GET_GEFS_LBCS_TN}
   'make_ics_tn': ${MAKE_ICS_TN}
   'blend_ics_tn': ${BLEND_ICS_TN}
   'make_lbcs_tn': ${MAKE_LBCS_TN}
-  'forecast_tn': ${FORECAST_TN}
-  'post_tn': ${POST_TN}
-  'prdgen_tn': ${PRDGEN_TN}
+  'add_aerosol_tn': ${ADD_AEROSOL_TN}
+  'run_fcst_tn': ${RUN_FCST_TN}
+  'run_post_tn': ${RUN_POST_TN}
+  'run_prdgen_tn': ${RUN_PRDGEN_TN}
   'analysis_gsi': ${ANALYSIS_GSI_TN}
   'analysis_gsidiag': ${ANALYSIS_GSIDIAG_TN}
-  'update_lbc_soil': ${UPDATE_LBC_SOIL_TN}
+  'analysis_sd_gsi': ${ANALYSIS_SD_GSI_TN}
+  'post_anal': ${POSTANAL_TN}
   'observer_gsi_ensmean': ${OBSERVER_GSI_ENSMEAN_TN}
   'observer_gsi': ${OBSERVER_GSI_TN}
+  'prep_start': ${PREP_START_TN}
   'prep_cyc_spinup': ${PREP_CYC_SPINUP_TN}
   'prep_cyc_prod': ${PREP_CYC_PROD_TN}
+  'prep_cyc_ensmean': ${PREP_CYC_ENSMEAN_TN}
   'prep_cyc': ${PREP_CYC_TN}
   'calc_ensmean': ${CALC_ENSMEAN_TN}
-  'process_radar': ${PROCESS_RADAR_TN}
+  'process_radarref': ${PROCESS_RADAR_REF_TN}
   'process_lightning': ${PROCESS_LIGHTNING_TN}
+  'process_glmfed': ${PROCESS_GLMFED_TN}
   'process_bufr': ${PROCESS_BUFR_TN}
   'process_smoke': ${PROCESS_SMOKE_TN}
-  'analysis_nonvarcld': ${ANALYSIS_NONVARCLD_TN}
-  'bufrsnd_tn': ${BUFRSND_TN}
+  'process_pm': ${PROCESS_PM_TN}
+  'radar_refl2tten': ${RADAR_REFL2TTEN_TN}
+  'cldanl_nonvar': ${CLDANL_NONVAR_TN}
+  'run_bufrsnd_tn': ${RUN_BUFRSND_TN}
   'save_restart': ${SAVE_RESTART_TN}
   'save_da_output': ${SAVE_DA_OUTPUT_TN}
   'tag': ${TAG}
   'net': ${NET}
   'run': ${RUN}
-  'envir': ${envir}
+  'jedi_envar_ioda': ${JEDI_ENVAR_IODA_TN}
+  'ioda_prepbufr': ${IODA_PREPBUFR_TN}
 #
 # Number of nodes to use for each task.
 #
   'nnodes_make_grid': ${NNODES_MAKE_GRID}
   'nnodes_make_orog': ${NNODES_MAKE_OROG}
   'nnodes_make_sfc_climo': ${NNODES_MAKE_SFC_CLIMO}
+  'nnodes_get_extrn_ics': ${NNODES_GET_EXTRN_ICS}
+  'nnodes_get_extrn_lbcs': ${NNODES_GET_EXTRN_LBCS}
   'nnodes_make_ics': ${NNODES_MAKE_ICS}
   'nnodes_blend_ics': ${NNODES_BLEND_ICS}
   'nnodes_make_lbcs': ${NNODES_MAKE_LBCS}
-  'nnodes_prep_cyc': ${NNODES_PREP_CYC}
-  'nnodes_forecast': ${NNODES_FORECAST}
-  'nnodes_analysis_gsi': ${NNODES_ANALYSIS_GSI}
-  'nnodes_analysis_gsidiag': ${NNODES_ANALYSIS_GSIDIAG}
-  'nnodes_update_lbc_soil': ${NNODES_UPDATE_LBC_SOIL}
-  'nnodes_analysis_enkf': ${NNODES_ANALYSIS_ENKF}
-  'nnodes_recenter': ${NNODES_RECENTER}
-  'nnodes_post': ${NNODES_POST}
-  'nnodes_prdgen': ${NNODES_PRDGEN}
-  'nnodes_process_radar': ${NNODES_PROCESS_RADAR}
-  'nnodes_process_lightning': ${NNODES_PROCESS_LIGHTNING}
-  'nnodes_process_bufr': ${NNODES_PROCESS_BUFR}
-  'nnodes_process_smoke': ${NNODES_PROCESS_SMOKE}
-  'nnodes_analysis_nonvarcld': ${NNODES_ANALYSIS_NONVARCLD}
-  'nnodes_bufrsnd': ${NNODES_BUFRSND}
+  'nnodes_run_prepstart': ${NNODES_RUN_PREPSTART}
+  'nnodes_run_fcst': ${NNODES_RUN_FCST}
+  'nnodes_run_analysis': ${NNODES_RUN_ANALYSIS}
+  'nnodes_run_gsidiag': ${NNODES_RUN_GSIDIAG}
+  'nnodes_run_postanal': ${NNODES_RUN_POSTANAL}
+  'nnodes_run_enkf': ${NNODES_RUN_ENKF}
+  'nnodes_run_recenter': ${NNODES_RUN_RECENTER}
+  'nnodes_run_post': ${NNODES_RUN_POST}
+  'nnodes_run_prdgen': ${NNODES_RUN_PRDGEN}
+  'nnodes_proc_radar': ${NNODES_PROC_RADAR}
+  'nnodes_proc_lightning': ${NNODES_PROC_LIGHTNING}
+  'nnodes_proc_glmfed': ${NNODES_PROC_GLMFED}
+  'nnodes_proc_bufr': ${NNODES_PROC_BUFR}
+  'nnodes_proc_smoke': ${NNODES_PROC_SMOKE}
+  'nnodes_proc_pm': ${NNODES_PROC_PM}
+  'nnodes_run_ref2tten': ${NNODES_RUN_REF2TTEN}
+  'nnodes_run_nonvarcldanl': ${NNODES_RUN_NONVARCLDANL}
+  'nnodes_run_graphics': ${NNODES_RUN_GRAPHICS}
+  'nnodes_run_enspost': ${NNODES_RUN_ENSPOST}
+  'nnodes_run_bufrsnd': ${NNODES_RUN_BUFRSND}
   'nnodes_save_restart': ${NNODES_SAVE_RESTART}
+  'nnodes_run_jedienvar_ioda': ${NNODES_RUN_JEDIENVAR_IODA}
+  'nnodes_run_ioda_prepbufr': ${NNODES_RUN_IODA_PREPBUFR}
+  'nnodes_add_aerosol': ${NNODES_ADD_AEROSOL}
 #
 # Number of cores used for a task
 #
-  'ncores_forecast': ${PE_MEMBER01}
-  'native_forecast': ${NATIVE_FORECAST}
-  'ncores_analysis_gsi': ${NCORES_ANALYSIS_GSI}
+  'ncores_run_fcst': ${PE_MEMBER01}
+  'native_run_fcst': ${NATIVE_RUN_FCST}
+  'ncores_run_analysis': ${NCORES_RUN_ANALYSIS}
   'ncores_run_observer': ${NCORES_RUN_OBSERVER}
-  'native_analysis_gsi': ${NATIVE_ANALYSIS_GSI}
-  'ncores_analysis_enkf': ${NCORES_ANALYSIS_ENKF}
-  'native_analysis_enkf': ${NATIVE_ANALYSIS_ENKF}
+  'native_run_analysis': ${NATIVE_RUN_ANALYSIS}
+  'ncores_run_enkf': ${NCORES_RUN_ENKF}
+  'native_run_enkf': ${NATIVE_RUN_ENKF}
 #
 # Number of logical processes per node for each task.  If running without
 # threading, this is equal to the number of MPI processes per node.
@@ -257,60 +283,80 @@ settings="\
   'ppn_make_grid': ${PPN_MAKE_GRID}
   'ppn_make_orog': ${PPN_MAKE_OROG}
   'ppn_make_sfc_climo': ${PPN_MAKE_SFC_CLIMO}
+  'ppn_get_extrn_ics': ${PPN_GET_EXTRN_ICS}
+  'ppn_get_extrn_lbcs': ${PPN_GET_EXTRN_LBCS}
   'ppn_make_ics': ${PPN_MAKE_ICS}
   'ppn_blend_ics': ${PPN_BLEND_ICS}
   'ppn_make_lbcs': ${PPN_MAKE_LBCS}
-  'ppn_prep_cyc': ${PPN_PREP_CYC}
-  'ppn_forecast': ${PPN_FORECAST}
-  'ppn_analysis_gsi': ${PPN_ANALYSIS_GSI}
-  'ppn_analysis_gsidiag': ${PPN_ANALYSIS_GSIDIAG}
-  'ppn_update_lbc_soil': ${PPN_UPDATE_LBC_SOIL}
-  'ppn_analysis_enkf': ${PPN_ANALYSIS_ENKF}
-  'ppn_recenter': ${PPN_RECENTER}
-  'ppn_post': ${PPN_POST}
-  'ppn_prdgen': ${PPN_PRDGEN}
-  'ppn_process_radar': ${PPN_PROCESS_RADAR}
-  'ppn_process_lightning': ${PPN_PROCESS_LIGHTNING}
-  'ppn_process_bufr': ${PPN_PROCESS_BUFR}
-  'ppn_process_smoke': ${PPN_PROCESS_SMOKE}
-  'ppn_analysis_nonvarcld': ${PPN_ANALYSIS_NONVARCLD}
-  'ppn_bufrsnd': ${PPN_BUFRSND}
+  'ppn_run_prepstart': ${PPN_RUN_PREPSTART}
+  'ppn_run_fcst': ${PPN_RUN_FCST}
+  'ppn_run_analysis': ${PPN_RUN_ANALYSIS}
+  'ppn_run_gsidiag': ${PPN_RUN_GSIDIAG}
+  'ppn_run_postanal': ${PPN_RUN_POSTANAL}
+  'ppn_run_enkf': ${PPN_RUN_ENKF}
+  'ppn_run_recenter': ${PPN_RUN_RECENTER}
+  'ppn_run_post': ${PPN_RUN_POST}
+  'ppn_run_prdgen': ${PPN_RUN_PRDGEN}
+  'ppn_proc_radar': ${PPN_PROC_RADAR}
+  'ppn_proc_lightning': ${PPN_PROC_LIGHTNING}
+  'ppn_proc_glmfed': ${PPN_PROC_GLMFED}
+  'ppn_proc_bufr': ${PPN_PROC_BUFR}
+  'ppn_proc_smoke': ${PPN_PROC_SMOKE}
+  'ppn_proc_pm': ${PPN_PROC_PM}
+  'ppn_run_ref2tten': ${PPN_RUN_REF2TTEN}
+  'ppn_run_nonvarcldanl': ${PPN_RUN_NONVARCLDANL}
+  'ppn_run_graphics': ${PPN_RUN_GRAPHICS}
+  'ppn_run_enspost': ${PPN_RUN_ENSPOST}
+  'ppn_run_bufrsnd': ${PPN_RUN_BUFRSND}
   'ppn_save_restart': ${PPN_SAVE_RESTART}
+  'ppn_run_jedienvar_ioda': ${PPN_RUN_JEDIENVAR_IODA}
+  'ppn_run_ioda_prepbufr': ${PPN_RUN_IODA_PREPBUFR}
+  'ppn_add_aerosol': ${PPN_ADD_AEROSOL}
 #
   'tpp_make_ics': ${TPP_MAKE_ICS}
   'tpp_make_lbcs': ${TPP_MAKE_LBCS}
-  'tpp_analysis_gsi': ${TPP_ANALYSIS_GSI}
-  'tpp_analysis_enkf': ${TPP_ANALYSIS_ENKF}
-  'tpp_forecast': ${TPP_FORECAST}
-  'tpp_post': ${TPP_POST}
-  'tpp_bufrsnd': ${TPP_BUFRSND}
+  'tpp_run_analysis': ${TPP_RUN_ANALYSIS}
+  'tpp_run_enkf': ${TPP_RUN_ENKF}
+  'tpp_run_fcst': ${TPP_RUN_FCST}
+  'tpp_run_post': ${TPP_RUN_POST}
+  'tpp_run_bufrsnd': ${TPP_RUN_BUFRSND}
 #
 # Maximum wallclock time for each task.
 #
   'wtime_make_grid': ${WTIME_MAKE_GRID}
   'wtime_make_orog': ${WTIME_MAKE_OROG}
   'wtime_make_sfc_climo': ${WTIME_MAKE_SFC_CLIMO}
+  'wtime_get_extrn_ics': ${WTIME_GET_EXTRN_ICS}
+  'wtime_get_extrn_lbcs': ${WTIME_GET_EXTRN_LBCS}
   'wtime_make_ics': ${WTIME_MAKE_ICS}
   'wtime_blend_ics': ${WTIME_BLEND_ICS}
   'wtime_make_lbcs': ${WTIME_MAKE_LBCS}
-  'wtime_prep_cyc': ${WTIME_PREP_CYC}
-  'wtime_forecast': ${WTIME_FORECAST}
-  'wtime_forecast_long': ${WTIME_FORECAST_LONG}
-  'wtime_forecast_spinup': ${WTIME_FORECAST_SPINUP}
-  'wtime_analysis_gsi': ${WTIME_ANALYSIS_GSI}
-  'wtime_analysis_gsidiag': ${WTIME_ANALYSIS_GSIDIAG}
-  'wtime_update_lbc_soil': ${WTIME_UPDATE_LBC_SOIL}
-  'wtime_analysis_enkf': ${WTIME_ANALYSIS_ENKF}
-  'wtime_recenter': ${WTIME_RECENTER}
-  'wtime_post': ${WTIME_POST}
-  'wtime_prdgen': ${WTIME_PRDGEN}
-  'wtime_process_radar': ${WTIME_PROCESS_RADAR}
-  'wtime_process_lightning': ${WTIME_PROCESS_LIGHTNING}
-  'wtime_process_bufr': ${WTIME_PROCESS_BUFR}
-  'wtime_process_smoke': ${WTIME_PROCESS_SMOKE}
-  'wtime_analysis_nonvarcld': ${WTIME_ANALYSIS_NONVARCLD}
-  'wtime_bufrsnd': ${WTIME_BUFRSND}
+  'wtime_run_prepstart': ${WTIME_RUN_PREPSTART}
+  'wtime_run_prepstart_ensmean': ${WTIME_RUN_PREPSTART_ENSMEAN}
+  'wtime_run_fcst': ${WTIME_RUN_FCST}
+  'wtime_run_fcst_long': ${WTIME_RUN_FCST_LONG}
+  'wtime_run_fcst_spinup': ${WTIME_RUN_FCST_SPINUP}
+  'wtime_run_analysis': ${WTIME_RUN_ANALYSIS}
+  'wtime_run_gsidiag': ${WTIME_RUN_GSIDIAG}
+  'wtime_run_postanal': ${WTIME_RUN_POSTANAL}
+  'wtime_run_enkf': ${WTIME_RUN_ENKF}
+  'wtime_run_recenter': ${WTIME_RUN_RECENTER}
+  'wtime_run_post': ${WTIME_RUN_POST}
+  'wtime_run_enspost': ${WTIME_RUN_ENSPOST}
+  'wtime_run_prdgen': ${WTIME_RUN_PRDGEN}
+  'wtime_proc_radar': ${WTIME_PROC_RADAR}
+  'wtime_proc_lightning': ${WTIME_PROC_LIGHTNING}
+  'wtime_proc_glmfed': ${WTIME_PROC_GLMFED}
+  'wtime_proc_bufr': ${WTIME_PROC_BUFR}
+  'wtime_proc_smoke': ${WTIME_PROC_SMOKE}
+  'wtime_proc_pm': ${WTIME_PROC_PM}
+  'wtime_run_ref2tten': ${WTIME_RUN_REF2TTEN}
+  'wtime_run_nonvarcldanl': ${WTIME_RUN_NONVARCLDANL}
+  'wtime_run_bufrsnd': ${WTIME_RUN_BUFRSND}
   'wtime_save_restart': ${WTIME_SAVE_RESTART}
+  'wtime_run_jedienvar_ioda': ${WTIME_RUN_JEDIENVAR_IODA}
+  'wtime_run_ioda_prepbufr': ${WTIME_RUN_IODA_PREPBUFR}
+  'wtime_add_aerosol': ${WTIME_ADD_AEROSOL}
 #
 # start time for each task.
 #
@@ -320,52 +366,70 @@ settings="\
   'start_time_blending': ${START_TIME_BLENDING}
   'start_time_late_analysis': ${START_TIME_LATE_ANALYSIS}
   'start_time_conventional': ${START_TIME_CONVENTIONAL}
+  'start_time_ioda_prepbufr': ${START_TIME_IODA_PREPBUFR}
   'start_time_nsslmosiac': ${START_TIME_NSSLMOSIAC}
-  'start_time_process_lightning': ${START_TIME_PROCESS_LIGHTNING}
-  'start_time_process_smoke': ${START_TIME_PROCESS_SMOKE}
+  'start_time_lightningnc': ${START_TIME_LIGHTNINGNC}
+  'start_time_proc_glmfed': ${START_TIME_GLMFED}
+  'start_time_procsmoke': ${START_TIME_PROCSMOKE}
+  'start_time_procpm': ${START_TIME_PROCPM}
 #
 # Maximum memory for each task.
 #
-  'memo_process_bufr': ${MEMO_PROCESS_BUFR}
-  'memo_analysis_nonvarcld': ${MEMO_ANALYSIS_NONVARCLD}
-  'memo_prdgen': ${MEMO_PRDGEN}
+  'memo_run_processbufr': ${MEMO_RUN_PROCESSBUFR}
+  'memo_run_ref2tten': ${MEMO_RUN_REF2TTEN}
+  'memo_run_nonvarcldanl': ${MEMO_RUN_NONVARCLDANL}
+  'memo_run_prepstart': ${MEMO_RUN_PREPSTART}
+  'memo_run_prdgen': ${MEMO_RUN_PRDGEN}
+  'memo_run_jedienvar_ioda': ${MEMO_RUN_JEDIENVAR_IODA}
+  'memo_run_ioda_prepbufr': ${MEMO_RUN_IODA_PREPBUFR}
   'memo_prep_cyc': ${MEMO_PREP_CYC}
   'memo_save_restart': ${MEMO_SAVE_RESTART}
   'memo_save_input': ${MEMO_SAVE_INPUT}
-  'memo_process_smoke': ${MEMO_PROCESS_SMOKE}
-  'memo_process_lightning': ${MEMO_PROCESS_LIGHTNING}
+  'memo_proc_smoke': ${MEMO_PROC_SMOKE}
+  'memo_proc_glmfed': ${MEMO_PROC_GLMFED}
+  'memo_proc_pm': ${MEMO_PROC_PM}
   'memo_save_da_output': ${MEMO_SAVE_DA_OUTPUT}
+  'memo_add_aerosol': ${MEMO_ADD_AEROSOL}
 #
 # Maximum number of tries for each task.
 #
   'maxtries_make_grid': ${MAXTRIES_MAKE_GRID}
   'maxtries_make_orog': ${MAXTRIES_MAKE_OROG}
   'maxtries_make_sfc_climo': ${MAXTRIES_MAKE_SFC_CLIMO}
+  'maxtries_get_extrn_ics': ${MAXTRIES_GET_EXTRN_ICS}
+  'maxtries_get_extrn_lbcs': ${MAXTRIES_GET_EXTRN_LBCS}
   'maxtries_make_ics': ${MAXTRIES_MAKE_ICS}
   'maxtries_blend_ics': ${MAXTRIES_BLEND_ICS}
   'maxtries_make_lbcs': ${MAXTRIES_MAKE_LBCS}
-  'maxtries_prep_cyc': ${MAXTRIES_PREP_CYC}
-  'maxtries_forecast': ${MAXTRIES_FORECAST}
+  'maxtries_run_prepstart': ${MAXTRIES_RUN_PREPSTART}
+  'maxtries_run_fcst': ${MAXTRIES_RUN_FCST}
   'maxtries_analysis_gsi': ${MAXTRIES_ANALYSIS_GSI}
-  'maxtries_update_lbc_soil': ${MAXTRIES_UPDATE_LBC_SOIL}
+  'maxtries_postanal': ${MAXTRIES_POSTANAL}
   'maxtries_analysis_enkf': ${MAXTRIES_ANALYSIS_ENKF}
   'maxtries_recenter': ${MAXTRIES_RECENTER}
-  'maxtries_post': ${MAXTRIES_POST}
-  'maxtries_prdgen': ${MAXTRIES_PRDGEN}
-  'maxtries_process_radar': ${MAXTRIES_PROCESS_RADAR}
+  'maxtries_run_post': ${MAXTRIES_RUN_POST}
+  'maxtries_run_prdgen': ${MAXTRIES_RUN_PRDGEN}
+  'maxtries_process_radarref': ${MAXTRIES_PROCESS_RADARREF}
   'maxtries_process_lightning': ${MAXTRIES_PROCESS_LIGHTNING}
+  'maxtries_proc_glmfed': ${MAXTRIES_PROC_GLMFED}
   'maxtries_process_bufr': ${MAXTRIES_PROCESS_BUFR}
   'maxtries_process_smoke': ${MAXTRIES_PROCESS_SMOKE}
-  'maxtries_analysis_nonvarcld': ${MAXTRIES_ANALYSIS_NONVARCLD}
+  'maxtries_process_pm': ${MAXTRIES_PROCESS_PM}
+  'maxtries_radar_ref2tten': ${MAXTRIES_RADAR_REF2TTEN}
+  'maxtries_cldanl_nonvar': ${MAXTRIES_CLDANL_NONVAR}
   'maxtries_save_restart': ${MAXTRIES_SAVE_RESTART}
   'maxtries_save_da_output': ${MAXTRIES_SAVE_DA_OUTPUT}
+  'maxtries_jedi_envar_ioda': ${MAXTRIES_JEDI_ENVAR_IODA}
+  'maxtries_ioda_prepbufr': ${MAXTRIES_IODA_PREPBUFR}
+  'maxtries_add_aerosol': ${MAXTRIES_ADD_AEROSOL}
 #
 # Flags that determine whether to run the specific tasks.
 #
   'run_task_make_grid': ${RUN_TASK_MAKE_GRID}
   'run_task_make_orog': ${RUN_TASK_MAKE_OROG}
   'run_task_make_sfc_climo': ${RUN_TASK_MAKE_SFC_CLIMO}
-  'run_task_prdgen': ${RUN_TASK_PRDGEN}
+  'run_task_run_prdgen': ${RUN_TASK_RUN_PRDGEN}
+  'run_task_add_aerosol': ${RUN_TASK_ADD_AEROSOL}
 #
   'is_rtma':  ${IS_RTMA}
   'fg_rootdir': ${FG_ROOTDIR}
@@ -376,15 +440,15 @@ settings="\
 #
 # Directories and files.
 #
-  'homerrfs': $HOMErrfs
+  'jobsdir': $JOBSdir
   'log_basedir': ${LOG_BASEDIR:-}
-  'dataroot': ${DATAROOT:-}
-  'ensctrl_dataroot': ${ENSCTRL_DATAROOT:-}
-  'gesroot': ${GESROOT:-}
-  'ensctrl_gesroot': ${ENSCTRL_GESROOT:-}
-  'comroot': ${COMROOT:-}
-  'ensctrl_comout': ${ENSCTRL_COMOUT:-}
-  'rrfse_gesroot': ${RRFSE_GESROOT:-}
+  'cycle_basedir': ${CYCLE_BASEDIR:-}
+  'ensctrl_cycle_basedir': ${ENSCTRL_CYCLE_BASEDIR:-}
+  'nwges_basedir': ${NWGES_BASEDIR:-}
+  'ensctrl_nwges_basedir': ${ENSCTRL_NWGES_BASEDIR:-}
+  'ensctrl_comout_basedir': ${ENSCTRL_COMOUT_BASEDIR:-}
+  'ensctrl_comout_dir': ${ENSCTRL_COMOUT_DIR:-}
+  'rrfse_nwges_basedir': ${RRFSE_NWGES_BASEDIR:-}
   'obstype_source': ${OBSTYPE_SOURCE}
   'obspath': ${OBSPATH}
   'obspath_pm': ${OBSPATH_PM}
@@ -402,8 +466,8 @@ settings="\
   'extrn_mdl_lbcs_search_offset_hrs': ${EXTRN_MDL_LBCS_SEARCH_OFFSET_HRS}
   'lbcs_search_hrs': ${LBCS_SEARCH_HRS}
   'bc_update_interval': ${LBC_SPEC_INTVL_HRS}
-  'gfs_file_fmt_ics': ${GFS_FILE_FMT_ICS}
-  'gfs_file_fmt_lbcs': ${GFS_FILE_FMT_LBCS}
+  'fv3gfs_file_fmt_ics': ${FV3GFS_FILE_FMT_ICS}
+  'fv3gfs_file_fmt_lbcs': ${FV3GFS_FILE_FMT_LBCS}
 #
 # Parameters that determine the set of cycles to run.
 #
@@ -432,6 +496,7 @@ settings="\
   'prodlong_cycledef': ${PRODLONG_CYCLEDEF}
   'saveda_cycledef': ${SAVEDA_CYCLEDEF}
   'recenter_cycledef': ${RECENTER_CYCLEDEF}
+  'archive_cycledef': ${ARCHIVE_CYCLEDEF}
   'dt_atmos': ${DT_ATMOS}
 #
 # boundary, forecast, and post process length.
@@ -458,6 +523,7 @@ settings="\
   'ndigits_ensmem_names': !!str ${NDIGITS_ENSMEM_NAMES}
   'ensmem_indx_name': ${ensmem_indx_name}
   'uscore_ensmem_name': ${uscore_ensmem_name}
+  'slash_ensmem_subdir': ${slash_ensmem_subdir}
   'do_enscontrol': ${DO_ENSCONTROL}
   'do_gsiobserver': ${DO_GSIOBSERVER}
   'do_enkfupdate': ${DO_ENKFUPDATE}
@@ -466,6 +532,8 @@ settings="\
   'do_envar_radar_ref_once': ${DO_ENVAR_RADAR_REF_ONCE}
   'do_recenter': ${DO_RECENTER}
   'do_bufrsnd': ${DO_BUFRSND}
+  'do_ens_graphics': ${DO_ENS_GRAPHICS}
+  'do_enspost': ${DO_ENSPOST}
   'do_ensinit': ${DO_ENSINIT}
   'do_save_da_output': ${DO_SAVE_DA_OUTPUT}
   'do_gsidiag_offline': ${DO_GSIDIAG_OFFLINE}
@@ -476,10 +544,12 @@ settings="\
   'do_dacycle': ${DO_DACYCLE}
   'do_surface_cycle': ${DO_SURFACE_CYCLE}
   'da_cycle_interval_hrs': ${DA_CYCLE_INTERV}
-  'do_analysis_nonvarcld': ${DO_ANALYSIS_NONVARCLD}
+  'do_nonvar_cldanal': ${DO_NONVAR_CLDANAL}
+  'do_refl2tten': ${DO_REFL2TTEN}
   'do_spinup': ${DO_SPINUP}
   'do_post_spinup': ${DO_POST_SPINUP}
   'do_post_prod': ${DO_POST_PROD}
+  'do_nldn_lght': ${DO_NLDN_LGHT}
   'do_glmfed_da': ${DO_GLM_FED_DA}
   'prep_model_for_fed': ${PREP_MODEL_FOR_FED}
   'regional_ensemble_option': ${regional_ensemble_option}
@@ -498,10 +568,27 @@ settings="\
   'endday': ${ENDDAY}
   'endhour': ${ENDHOUR}
 #
+# JEDI related parameters (liaofan)
+#
+  'do_jedi_envar_ioda': ${DO_JEDI_ENVAR_IODA}
+#
+# IODA related parameters
+#
+  'do_ioda_prepbufr': ${DO_IODA_PREPBUFR}
+#
 # smoke and dust related parameters.
 #
   'do_smoke_dust': ${DO_SMOKE_DUST}
   'ebb_dcycle'   : ${EBB_DCYCLE}
+#
+# PM related parameters.
+#
+  'do_pm_da': ${DO_PM_DA}
+#
+# graphics related parameters
+#
+  'tilelabels': \"${TILE_LABELS}\"
+  'tilesets': \"${TILE_SETS}\"
 #
 #  retrospective experiments
 #
@@ -524,8 +611,8 @@ $settings"
 # script to generate the experiment's actual XML file from this template
 # file.
 #
-template_xml_fp="${PARMrrfs}/${WFLOW_XML_TMPL_FN}"
-$USHrrfs/fill_jinja_template.py -q \
+template_xml_fp="${PARMdir}/${WFLOW_XML_TMPL_FN}"
+$USHdir/fill_jinja_template.py -q \
                                -u "${settings}" \
                                -t ${template_xml_fp} \
                                -o ${WFLOW_XML_FP} || \
@@ -641,7 +728,7 @@ fi
 #
 if [ "${DO_DACYCLE}" = "TRUE" ]; then
   # Resolve the target directory that the FIXgsi symlink points to
-  ln -fsn "$FIXrrfs/gsi" "$FIXgsi"
+  ln -fsn "$FIX_GSI" "$FIXgsi"
   path_resolved=$( readlink -m "$FIXgsi" )
   if [ ! -d "${path_resolved}" ]; then
     print_err_msg_exit "Missing link to FIXgsi
@@ -653,7 +740,7 @@ if [ "${DO_DACYCLE}" = "TRUE" ]; then
 fi  # check if DA
 
 # Resolve the target directory that the FIXcrtm symlink points to
-ln -fsn "$CRTM_FIX" "$FIXcrtm"
+ln -fsn "$FIX_CRTM" "$FIXcrtm"
 path_resolved=$( readlink -m "$FIXcrtm" )
 if [ ! -d "${path_resolved}" ]; then
   print_err_msg_exit "Missing link to FIXcrtm
@@ -664,7 +751,7 @@ if [ ! -d "${path_resolved}" ]; then
 fi
 
 # Resolve the target directory that the FIXuppcrtm symlink points to
-ln -fsn "$CRTM_FIX" "$FIXuppcrtm"
+ln -fsn "$FIX_UPP_CRTM" "$FIXuppcrtm"
 path_resolved=$( readlink -m "$FIXuppcrtm" )
 if [ ! -d "${path_resolved}" ]; then
   print_err_msg_exit "\
@@ -676,7 +763,7 @@ if [ ! -d "${path_resolved}" ]; then
 fi
 
 # Resolve the target directory that the FIXsmokedust symlink points to
-ln -fsn "$FIXrrfs/smoke_dust" "$FIXsmokedust"
+ln -fsn "$FIX_SMOKE_DUST" "$FIXsmokedust"
 path_resolved=$( readlink -m "$FIXsmokedust" )
 if [ ! -d "${path_resolved}" ]; then
   print_err_msg_exit "Missing link to FIXsmokedust
@@ -688,7 +775,7 @@ fi
 
 if [ "${DO_BUFRSND}" = "TRUE" ]; then
   # Resolve the target directory that the FIXbufrsnd symlink points to
-  ln -fsn "$FIXrrfs/bufrsnd" "$FIXbufrsnd"
+  ln -fsn "$FIX_BUFRSND" "$FIXbufrsnd"
   path_resolved=$( readlink -m "$FIXbufrsnd" )
   if [ ! -d "${path_resolved}" ]; then
     print_err_msg_exit "Missing link to FIXbufrsnd
@@ -941,7 +1028,7 @@ settings="$settings
 # For generating the namelist for the fire weather grid, do not use a yaml file.
 #
 if [ "${PREDEF_GRID_NAME}" = "RRFS_FIREWX_1.5km" ]; then
-$USHrrfs/set_namelist.py -q \
+$USHdir/set_namelist.py -q \
                         -n ${FV3_NML_BASE_SUITE_FP} \
                         -u "$settings" \
                         -o ${FV3_NML_FP} || \
@@ -957,7 +1044,7 @@ failed.  Parameters passed to this script are:
 $settings"
 
 else
-$USHrrfs/set_namelist.py -q \
+$USHdir/set_namelist.py -q \
                         -n ${FV3_NML_BASE_SUITE_FP} \
                         -c ${FV3_NML_YAML_CONFIG_FP} ${CCPP_PHYS_SUITE} \
                         -u "$settings" \
@@ -1024,7 +1111,7 @@ if [[ "${DO_DACYCLE}" = "TRUE" || "${DO_ENKFUPDATE}" = "TRUE" ]]; then
 #    'fh_dfi_radar': [${FH_DFI_RADAR[@]}],
 #  }"
  
- $USHrrfs/set_namelist.py -q \
+ $USHdir/set_namelist.py -q \
                          -n ${FV3_NML_FP} \
                          -u "$settings" \
                          -o ${FV3_NML_RESTART_FP} || \
@@ -1150,7 +1237,7 @@ $settings"
 if [ "${DO_ENSEMBLE}" = TRUE ] && ([ "${DO_SPP}" = TRUE ] || [ "${DO_SPPT}" = TRUE ] || [ "${DO_SHUM}" = TRUE ] \
   || [ "${DO_SKEB}" = TRUE ] || [ "${DO_LSM_SPP}" =  TRUE ]); then
 
-  $USHrrfs/set_namelist.py -q \
+  $USHdir/set_namelist.py -q \
                           -n  ${FV3_NML_FP}  \
                           -u "$settings" \
                           -o ${FV3_NML_STOCH_FP} || \
@@ -1168,7 +1255,7 @@ if [ "${DO_ENSEMBLE}" = TRUE ] && ([ "${DO_SPP}" = TRUE ] || [ "${DO_SPPT}" = TR
 #-----------------------------------------------------------------------
 #
 if [[ "${DO_DACYCLE}" = "TRUE" || "${DO_ENKFUPDATE}" = "TRUE" ]]; then
-  $USHrrfs/set_namelist.py -q \
+  $USHdir/set_namelist.py -q \
                           -n  ${FV3_NML_RESTART_FP}  \
                           -u "$settings" \
                           -o ${FV3_NML_RESTART_STOCH_FP} || \
@@ -1186,7 +1273,7 @@ if [[ "${DO_DACYCLE}" = "TRUE" || "${DO_ENKFUPDATE}" = "TRUE" ]]; then
  if [ "${DO_ENSFCST_MULPHY}" = "TRUE" ]; then
    for i in {1..5}
    do
-     $USHrrfs/set_namelist.py -q \
+     $USHdir/set_namelist.py -q \
                              -n  ${FV3_NML_RESTART_STOCH_FP}  \
                              -c ${FV3_NML_YAML_CONFIG_FP}_ensphy rrfsens_phy${i}  \
                              -o ${FV3_NML_RESTART_STOCH_FP}_ensphy${i}
@@ -1206,7 +1293,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-cp $USHrrfs/${EXPT_CONFIG_FN} $EXPTDIR
+cp $USHdir/${EXPT_CONFIG_FN} $EXPTDIR
 #
 #-----------------------------------------------------------------------
 #
@@ -1292,7 +1379,7 @@ if [ "${NOMADS}" = "TRUE" ]; then
   echo "Getting NOMADS online data"
   echo "NOMADS_file_type=" $NOMADS_file_type
   cd $EXPTDIR
-  $USHrrfs/NOMADS_get_extrn_mdl_files.sh $DATE_FIRST_CYCL $CYCL_HRS $NOMADS_file_type $FCST_LEN_HRS $LBC_SPEC_INTVL_HRS
+  $USHdir/NOMADS_get_extrn_mdl_files.sh $DATE_FIRST_CYCL $CYCL_HRS $NOMADS_file_type $FCST_LEN_HRS $LBC_SPEC_INTVL_HRS
 fi
 #
 #-----------------------------------------------------------------------
@@ -1335,21 +1422,21 @@ scrfunc_dir=$( dirname "${scrfunc_fp}" )
 #
 #-----------------------------------------------------------------------
 #
-USHrrfs="${scrfunc_dir}"
+USHdir="${scrfunc_dir}"
 #
 # Set the name of and full path to the temporary file in which we will
 # save some experiment/workflow variables.  The need for this temporary
 # file is explained below.
 #
 tmp_fn="tmp"
-tmp_fp="$USHrrfs/${tmp_fn}"
+tmp_fp="$USHdir/${tmp_fn}"
 rm -f "${tmp_fp}"
 #
 # Set the name of and full path to the log file in which the output from
 # the experiment/workflow generation function will be saved.
 #
 log_fn="log.generate_FV3LAM_wflow"
-log_fp="$USHrrfs/${log_fn}"
+log_fp="$USHdir/${log_fn}"
 rm -f "${log_fp}"
 #
 # Call the generate_FV3LAM_wflow function defined above to generate the

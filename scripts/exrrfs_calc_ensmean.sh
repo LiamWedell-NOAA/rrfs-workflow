@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -42,8 +42,8 @@ print_info_msg "
 Entering script:  \"${scrfunc_fn}\"
 In directory:     \"${scrfunc_dir}\"
 
-This is the ex-script for the task that calculates ensemble mean with 
-RRFS for the specified cycle.
+This is the ex-script for the task that calculates ensemble mean with FV3 for the
+specified cycle.
 ========================================================================"
 #
 #-----------------------------------------------------------------------
@@ -61,8 +61,8 @@ case $MACHINE in
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=500M
   export OMP_NUM_THREADS=1
-  ncores=$(( NNODES_RECENTER*PPN_RECENTER ))
-  APRUN="mpiexec -n ${ncores} -ppn ${PPN_RECENTER} --cpu-bind core --depth ${OMP_NUM_THREADS}"
+  ncores=$(( NNODES_RUN_RECENTER*PPN_RUN_RECENTER ))
+  APRUN="mpiexec -n ${ncores} -ppn ${PPN_RUN_RECENTER} --cpu-bind core --depth ${OMP_NUM_THREADS}"
   ;;
 #
 "HERA")
@@ -112,19 +112,20 @@ YYYYMMDD=${YYYYMMDDHH:0:8}
 #
 # loop through ensemble members to link all the member files
 #
-#--------------------------------------------------------------------
-#
+
+if [ "${CYCLE_TYPE}" = "spinup" ]; then
+  fg_restart_dirname=fcst_fv3lam_spinup
+else
+  fg_restart_dirname=fcst_fv3lam
+fi
+
 imem=1
 for imem in  $(seq 1 $nens)
   do
-  ensmem=$( printf "%03d" $imem ) 
+  ensmem=$( printf "%04d" $imem ) 
   memberstring=$( printf "%03d" $imem )
 
-  if [ "${CYCLE_TYPE}" = "spinup" ]; then
-    bkpath=${DATAROOT}/${RUN}_forecast_spinup_m${ensmem}_${envir}_${cyc}/INPUT  # cycling, use background from RESTART
-  else
-    bkpath=${DATAROOT}/${RUN}_forecast_m${ensmem}_${envir}_${cyc}/INPUT  # cycling, use background from RESTART
-  fi
+  bkpath=${CYCLE_DIR}/mem${ensmem}/${fg_restart_dirname}/INPUT  # cycling, use background from RESTART
 
   dynvarfile=${bkpath}/fv_core.res.tile1.nc
   tracerfile=${bkpath}/fv_tracer.res.tile1.nc
@@ -134,11 +135,11 @@ for imem in  $(seq 1 $nens)
     ln -sf ${bkpath}/sfc_data.nc  ./fv3sar_tile1_mem${memberstring}_sfcvar
     if [ $imem -eq 1 ]; then
       # Prepare the data structure for ensemble mean
-      cpreq -p -f ${bkpath}/fv_core.res.tile1.nc  fv3sar_tile1_dynvar
-      cpreq -p -f ${bkpath}/fv_tracer.res.tile1.nc  fv3sar_tile1_tracer
-      cpreq -p -f ${bkpath}/sfc_data.nc  fv3sar_tile1_sfcvar
+      cp -f ${bkpath}/fv_core.res.tile1.nc  fv3sar_tile1_dynvar
+      cp -f ${bkpath}/fv_tracer.res.tile1.nc  fv3sar_tile1_tracer
+      cp -f ${bkpath}/sfc_data.nc  fv3sar_tile1_sfcvar
       # Prepare other needed files for GSI observer run
-      cpreq -p -f ${bkpath}/coupler.res coupler.res
+      cp -f ${bkpath}/coupler.res coupler.res
       ln -snf ${bkpath}/fv_core.res.nc fv_core.res.nc
       ln -snf ${bkpath}/fv_srf_wnd.res.tile1.nc fv_srf_wnd.res.tile1.nc
       ln -snf ${bkpath}/phy_data.nc phy_data.nc
@@ -183,7 +184,7 @@ EOF
 export pgm="ens_mean_recenter_P2DIO.exe"
 . prep_step
 
-${APRUN} ${EXECrrfs}/$pgm < namelist.ens >>$pgmout 2>errfile
+${APRUN} ${EXECdir}/$pgm < namelist.ens >>$pgmout 2>errfile
 export err=$?; err_chk
 #
 #-----------------------------------------------------------------------

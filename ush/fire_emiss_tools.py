@@ -5,21 +5,19 @@ from datetime import datetime
 from netCDF4 import Dataset
 import interp_tools as i_tools
 
-#Compute average FRP from raw RAVE for the previous 24 hours 
-def averaging_FRP(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug):
-    # There are two situations here.
-    #   1) there is only on fire detection whithin 24 hours so FRP is divided by 2 
-    #   2) There are more than one fire detection so the average FRP is stimated
-    # ebb_smoke is always divided by the number of times a fire is detected within 24 hours window
+#Compute average FRP from raw RAVE for the previous 24 hours
+def averaging_FRP(ebb_dcycle, fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug, to_s):
     base_array = np.zeros((cols*rows))
     frp_daily = base_array
     ebb_smoke_total = []
+    ebb_smoke_hr = []
+    frp_avg_hr = []
 
     try:
         ef_map = xr.open_dataset(veg_map)
         emiss_factor = ef_map.emiss_factor.values
         target_area = tgt_area.values
-    except (FileNotFoundError, IOError,OSError,RuntimeError,ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
+    except (FileNotFoundError, IOError, OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
         print(f"Error loading vegetation map: {e}")
         return np.zeros((cols, rows)), np.zeros((cols, rows))
 
@@ -27,42 +25,62 @@ def averaging_FRP(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_a
     for cycle in fcst_dates:
         try:
             file_path = os.path.join(intp_dir, f'{rave_to_intp}{cycle}00_{cycle}59.nc')
-
             if os.path.exists(file_path):
                 try:
                     with xr.open_dataset(file_path) as nc:
                         open_fre = nc.FRE[0, :, :].values
                         open_frp = nc.frp_avg_hr[0, :, :].values
-
-                        ebb_hourly = open_fre * emiss_factor * beta * fg_to_ug / target_area
-                        ebb_smoke_total.append(np.where(open_frp > 0, ebb_hourly, 0).ravel())
-
-                        frp_daily += np.where(open_frp > 0, open_frp, 0).ravel()
-
                         num_files += 1
-                except (FileNotFoundError, IOError,OSError,RuntimeError,ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
+                        if ebb_dcycle == 1:
+                            print('Processing emissions for ebb_dcyc 1')
+                            print(file_path)
+                            frp_avg_hr.append(open_frp)
+                            ebb_hourly = (open_fre * emiss_factor * beta * fg_to_ug) / (target_area * to_s)
+                            ebb_smoke_total.append(np.where(open_frp > 0, ebb_hourly, 0))
+                        else:
+                            print('Processing emissions for ebb_dcyc 2')
+                            ebb_hourly = open_fre * emiss_factor * beta * fg_to_ug / target_area
+                            ebb_smoke_total.append(np.where(open_frp > 0, ebb_hourly, 0).ravel())
+                            frp_daily += np.where(open_frp > 0, open_frp, 0).ravel()
+                except (FileNotFoundError, IOError, OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
                     print(f"Error processing NetCDF file {file_path}: {e}")
+                    if ebb_dcycle == 1:
+                       frp_avg_hr.append(np.zeros((cols, rows)))
+                       ebb_smoke_total.append(np.zeros((cols, rows)))
+            else:
+                if ebb_dcycle == 1:
+                   frp_avg_hr.append(np.zeros((cols, rows)))
+                   ebb_smoke_total.append(np.zeros((cols, rows)))
         except Exception as e:
             print(f"Error processing cycle {cycle}: {e}")
+            if ebb_dcycle == 1:
+                frp_avg_hr.append(np.zeros((cols, rows)))
+                ebb_smoke_total.append(np.zeros((cols, rows)))
 
     if num_files > 0:
-        summed_array = np.sum(np.array(ebb_smoke_total), axis=0)
-        num_zeros = len(ebb_smoke_total) - np.sum([arr == 0 for arr in ebb_smoke_total], axis=0)
-        safe_zero_count = np.where(num_zeros == 0, 1, num_zeros)
-
-        result_array = [summed_array[i] / 2 if safe_zero_count[i] == 1 else summed_array[i] / safe_zero_count[i] for i in range(len(safe_zero_count))]
-        result_array = np.array(result_array)
-        result_array[num_zeros == 0] = summed_array[num_zeros == 0]
-        ebb_total = result_array.reshape(cols, rows)
-        ebb_total_reshaped = ebb_total / 3600
-
-        temp_frp = [frp_daily[i] / 2 if safe_zero_count[i] == 1 else frp_daily[i] / safe_zero_count[i] for i in range(len(safe_zero_count))]
-        temp_frp = np.array(temp_frp)
-        temp_frp[num_zeros == 0] = frp_daily[num_zeros == 0]
-        frp_avg_reshaped = temp_frp.reshape(cols, rows)
+        if ebb_dcycle == 1:
+            frp_avg_reshaped = np.stack(frp_avg_hr, axis=0)
+            ebb_total_reshaped = np.stack(ebb_smoke_total, axis=0)
+        else:
+            summed_array = np.sum(np.array(ebb_smoke_total), axis=0)
+            num_zeros = len(ebb_smoke_total) - np.sum([arr == 0 for arr in ebb_smoke_total], axis=0)
+            safe_zero_count = np.where(num_zeros == 0, 1, num_zeros)
+            result_array = [summed_array[i] / 2 if safe_zero_count[i] == 1 else summed_array[i] / safe_zero_count[i] for i in range(len(safe_zero_count))]
+            result_array = np.array(result_array)
+            result_array[num_zeros == 0] = summed_array[num_zeros == 0]
+            ebb_total = result_array.reshape(cols, rows)
+            ebb_total_reshaped = ebb_total / 3600
+            temp_frp = [frp_daily[i] / 2 if safe_zero_count[i] == 1 else frp_daily[i] / safe_zero_count[i] for i in range(len(safe_zero_count))]
+            temp_frp = np.array(temp_frp)
+            temp_frp[num_zeros == 0] = frp_daily[num_zeros == 0]
+            frp_avg_reshaped = temp_frp.reshape(cols, rows)
     else:
-        frp_avg_reshaped = np.zeros((cols, rows))
-        ebb_total_reshaped = np.zeros((cols, rows))
+        if ebb_dcycle == 1:
+            frp_avg_reshaped = np.zeros((24, cols, rows))
+            ebb_total_reshaped = np.zeros((24, cols, rows))
+        else:
+            frp_avg_reshaped = np.zeros((cols, rows))
+            ebb_total_reshaped = np.zeros((cols, rows))
 
     return(frp_avg_reshaped, ebb_total_reshaped)
 
@@ -105,6 +123,18 @@ def estimate_fire_duration(intp_avail_hours, intp_dir, fcst_dates, current_day, 
 def save_fire_dur(cols, rows, te):
     fire_dur = np.array(te).reshape(cols, rows)
     return(fire_dur)
+
+def produce_emiss_24hr_file(ebb_dcycle, frp_reshaped, intp_dir, current_day, tgt_latt, tgt_lont, ebb_smoke_reshaped, cols, rows):
+    file_path = os.path.join(intp_dir, f'SMOKE_RRFS_data_{current_day}00.nc')
+    with Dataset(file_path, 'w') as fout:
+        i_tools.create_emiss_file(fout, cols, rows)
+        i_tools.Store_latlon_by_Level(fout, 'geolat', tgt_latt, 'cell center latitude', 'degrees_north', '2D', '-9999.f', '1.f')
+        i_tools.Store_latlon_by_Level(fout, 'geolon', tgt_lont, 'cell center longitude', 'degrees_east', '2D', '-9999.f', '1.f')
+
+        i_tools.Store_by_Level(fout,'frp_avg_hr','mean Fire Radiative Power','MW','3D','0.f','1.f')
+        fout.variables['frp_avg_hr'][:, :, :] = frp_reshaped
+        i_tools.Store_by_Level(fout,'ebb_smoke_hr','EBB emissions','ug m-2 s-1','3D','0.f','1.f')
+        fout.variables['ebb_smoke_hr'][:, :, :] = ebb_smoke_reshaped
 
 def produce_emiss_file(xarr_hwp, frp_avg_reshaped, totprcp_ave_arr, xarr_totprcp, intp_dir, current_day, tgt_latt, tgt_lont, ebb_tot_reshaped, fire_age, cols, rows):
     # Ensure arrays are not negative or NaN

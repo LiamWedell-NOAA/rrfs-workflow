@@ -8,7 +8,7 @@
 #-----------------------------------------------------------------------
 #
 . ${GLOBAL_VAR_DEFNS_FP}
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -43,8 +43,30 @@ Entering script:  \"${scrfunc_fn}\"
 In directory:     \"${scrfunc_dir}\"
 
 This is the ex-script for the task that runs bufr (cloud, metar, lightning) preprocess
-with RRFS for the specified cycle.
+with FV3 for the specified cycle.
 ========================================================================"
+#
+#-----------------------------------------------------------------------
+#
+# Specify the set of valid argument names for this script/function.  
+# Then process the arguments provided to this script/function (which 
+# should consist of a set of name-value pairs of the form arg1="value1",
+# etc).
+#
+#-----------------------------------------------------------------------
+#
+valid_args=( "CYCLE_DIR" )
+process_args valid_args "$@"
+#
+#-----------------------------------------------------------------------
+#
+# For debugging purposes, print out values of arguments passed to this
+# script.  Note that these will be printed out only if VERBOSE is set to
+# TRUE.
+#
+#-----------------------------------------------------------------------
+#
+print_input_args valid_args
 #
 #-----------------------------------------------------------------------
 #
@@ -114,7 +136,7 @@ print_info_msg "$VERBOSE" "fixgriddir is $fixgriddir"
 #
 #-----------------------------------------------------------------------
 #
-cpreq -p ${fixgriddir}/fv3_grid_spec  fv3sar_grid_spec.nc
+cp ${fixgriddir}/fv3_grid_spec  fv3sar_grid_spec.nc
 #
 #-----------------------------------------------------------------------
 #
@@ -123,7 +145,7 @@ cpreq -p ${fixgriddir}/fv3_grid_spec  fv3sar_grid_spec.nc
 #-----------------------------------------------------------------------
 #
 BUFR_TABLE=${FIX_GSI}/prepobs_prep_RAP.bufrtable
-cpreq -p $BUFR_TABLE prepobs_prep.bufrtable
+cp $BUFR_TABLE prepobs_prep.bufrtable
 #
 #-----------------------------------------------------------------------
 #
@@ -173,7 +195,7 @@ run_lightning=false
 obs_file=${obspath_tmp}/${obsfileprefix}.t${HH}${SUBH}z.lghtng.tm00.bufr_d
 print_info_msg "$VERBOSE" "obsfile is $obs_file"
 if [ -r "${obs_file}" ]; then
-   cpreq -p "${obs_file}" "lghtngbufr"
+   cp "${obs_file}" "lghtngbufr"
    run_lightning=true
 else
    print_info_msg "$VERBOSE" "WARNING: ${obs_file} does not exist!"
@@ -215,7 +237,7 @@ export pgm="process_Lightning.exe"
 . prep_step
 
 if [[ "$run_lightning" == true ]]; then
-  $APRUN ${EXECrrfs}/$pgm >>$pgmout 2>errfile
+  $APRUN ${EXECdir}/$pgm >>$pgmout 2>errfile
   export err=$?; err_chk
   mv errfile errfile_lightning
 
@@ -232,7 +254,7 @@ obs_file=${obspath_tmp}/${obsfileprefix}.t${HH}${SUBH}z.lgycld.tm00.bufr_d
 print_info_msg "$VERBOSE" "obsfile is $obs_file"
 run_cloud=false
 if [ -r "${obs_file}" ]; then
-   cpreq -p "${obs_file}" "lgycld.bufr_d"
+   cp "${obs_file}" "lgycld.bufr_d"
    run_cloud=true
 else
    print_info_msg "$VERBOSE" "WARNING: ${obs_file} does not exist!"
@@ -274,14 +296,14 @@ EOF
 #
 #-----------------------------------------------------------------------
 #
-# Run the process for NASA LaRc cloud bufr file 
+# Run the process for NASA LaRc cloud  bufr file 
 #
 #-----------------------------------------------------------------------
 #
 export pgm="process_larccld.exe"
 . prep_step
 if [[ "$run_cloud" == true ]]; then
-  $APRUN ${EXECrrfs}/$pgm >>$pgmout 2>errfile
+  $APRUN ${EXECdir}/$pgm >>$pgmout 2>errfile
   export err=$?; err_chk
   mv errfile errfile_larccld
 
@@ -298,7 +320,7 @@ obs_file=${obspath_tmp}/${obsfileprefix}.t${HH}${SUBH}z.prepbufr.tm00
 print_info_msg "$VERBOSE" "obsfile is $obs_file"
 run_metar=false
 if [ -r "${obs_file}" ]; then
-   cpreq -p "${obs_file}" "prepbufr"
+   cp "${obs_file}" "prepbufr"
    run_metar=true
 else
    print_info_msg "$VERBOSE" "WARNING: ${obs_file} does not exist!"
@@ -335,7 +357,7 @@ EOF
 export pgm="process_metarcld.exe"
 . prep_step
 if [[ "$run_metar" == true ]]; then
-  $APRUN ${EXECrrfs}/$pgm >>$pgmout 2>errfile
+  $APRUN ${EXECdir}/$pgm >>$pgmout 2>errfile
   export err=$?; err_chk
   mv errfile errfile_metarcld
 

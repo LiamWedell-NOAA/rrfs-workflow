@@ -41,9 +41,10 @@ DO_SAVE_INPUT="TRUE"
 DO_POST_SPINUP="FALSE"
 DO_POST_PROD="TRUE"
 DO_RETRO="FALSE"
-DO_ANALYSIS_NONVARCLD="TRUE"
+DO_NONVAR_CLDANAL="TRUE"
 DO_ENVAR_RADAR_REF="TRUE"
 DO_SMOKE_DUST="TRUE"
+DO_REFL2TTEN="FALSE"
 RADARREFL_TIMELEVEL=(0)
 FH_DFI_RADAR="0.0,0.25,0.5"
 DO_SOIL_ADJUST="TRUE"
@@ -55,8 +56,8 @@ USE_CLM="TRUE"
 DO_PARALLEL_PRDGEN="FALSE"
 DO_GSIDIAG_OFFLINE="TRUE"
 
-EXTRN_MDL_NAME_ICS="GFS"
-EXTRN_MDL_NAME_LBCS="GFS"
+EXTRN_MDL_NAME_ICS="FV3GFS"
+EXTRN_MDL_NAME_LBCS="FV3GFS"
 
 EXTRN_MDL_ICS_OFFSET_HRS="3"
 LBC_SPEC_INTVL_HRS="1"
@@ -78,6 +79,7 @@ INITIAL_CYCLEDEF="${DATE_FIRST_CYCL}0300 ${DATE_LAST_CYCL}2300 12:00:00"
 BOUNDARY_CYCLEDEF="${DATE_FIRST_CYCL}0000 ${DATE_LAST_CYCL}2300 06:00:00"
 PROD_CYCLEDEF="00 01-05,07-11,13-17,19-23 ${CYCLEDAY} ${CYCLEMONTH} ${STARTYEAR} *"
 PRODLONG_CYCLEDEF="00 00,06,12,18 ${CYCLEDAY} ${CYCLEMONTH} ${STARTYEAR} *"
+ARCHIVE_CYCLEDEF="${DATE_FIRST_CYCL}1400 ${DATE_LAST_CYCL}2300 24:00:00"
 if [[ $DO_SPINUP == "TRUE" ]] ; then
   SPINUP_CYCLEDEF="00 03-08,15-20 ${CYCLEDAY} ${CYCLEMONTH} ${STARTYEAR} *"
 fi
@@ -93,13 +95,7 @@ RESTART_INTERVAL_LONG="1 2"
 ## set up post
 POSTPROC_LEN_HRS="18"
 POSTPROC_LONG_LEN_HRS="60"
-
-# default
-OUTPUT_FH="1 -1"
-#set UPP/prdgen for 15 min output
-NFHMAX_HF="18"
-NFHOUT="1"
-NSOUT_MIN="15"
+NFHOUT_HF="1"
 
 USE_RRFSE_ENS="TRUE"
 CYCL_HRS_HYB_FV3LAM_ENS=("00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23")
@@ -116,11 +112,14 @@ WRTCMP_quantize_nsd="18"
 
 regional_ensemble_option=5
 
+ARCHIVEDIR="/NCEPDEV/emc-meso/1year/emc.lam/${TAG}"
+NCL_REGION="conus"
+
 . set_rrfs_config.sh
 
-GESROOT="${PTMP}/nwges"  # Path to directory GESROOT that save boundary, cold initial, restart files
+NWGES="${PTMP}/nwges"  # Path to directory NWGES that save boundary, cold initial, restart files
 if [[ ${regional_ensemble_option} == "5" ]]; then
-  RRFSE_GESROOT="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges" # Path to RRFSE directory GESROOT that mostly contains ensemble restart files for GSI hybrid.
+  RRFSE_NWGES="/lfs/h2/emc/ptmp/emc.lam/rrfs/${version}/nwges" # Path to RRFSE directory NWGES that mostly contains ensemble restart files for GSI hybrid.
   NUM_ENS_MEMBERS=30     # FV3LAM ensemble size for GSI hybrid analysis
   CYCL_HRS_PRODSTART_ENS=( "07" "19" )
   DO_ENVAR_RADAR_REF="TRUE"

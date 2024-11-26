@@ -8,14 +8,15 @@ if [[ -n $RESERVATION ]] ; then
   ACCOUNT=rtrr
   SERVICE_ACCOUNT=nrtrr
   PARTITION_DEFAULT=kjet
-  PARTITION_FORECAST=kjet
+  PARTITION_FCST=kjet
+  PARTITION_GRAPHICS=kjet,xjet,tjet,ujet,vjet
   PARTITION_ANALYSIS=kjet
 fi
 
 if [[ $MACHINE == "hera" ]] ; then
   ACCOUNT="wrfruc"
   PARTITION_DEFAULT=""
-  PARTITION_FORECAST=""
+  PARTITION_FCST=""
   QUEUE_ANALYSIS="batch"
 
 # for using RAP as boundary and initial
@@ -88,6 +89,7 @@ else
   if [[ $DO_SPINUP == "TRUE" ]] ; then
     SPINUP_CYCLEDEF="00 03-08,15-20 ${CYCLEDAY} ${CYCLEMONTH} 2021 *"
   fi
+  ARCHIVE_CYCLEDEF="${DATE_FIRST_CYCL}0700 ${DATE_LAST_CYCL}2300 24:00:00"
 fi
 
 FCST_LEN_HRS="18"
@@ -109,11 +111,11 @@ if [[ -n $RESERVATION ]] ; then
   PPN_MAKE_ICS="20"
   NNODES_MAKE_LBCS="3"
   PPN_MAKE_LBCS="20"
-  NNODES_POST="1"
-  PPN_POST="40"
+  NNODES_RUN_POST="1"
+  PPN_RUN_POST="40"
 fi
 
-WTIME_FORECAST="03:00:00"
+WTIME_RUN_FCST="03:00:00"
 DT_ATMOS=40
 
 EXTRN_MDL_NAME_ICS="RAP"
@@ -124,6 +126,10 @@ envir="para"
 NET="RRFS_AK"
 TAG="RRFS_dev1_AK"
 
+ARCHIVEDIR="/5year/BMC/wrfruc/rrfs_ak_dev1"
+NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
+NCL_HOME="/home/rtrr/RRFS/graphics"
+NCL_REGION="alaska"
 MODEL="RRFS_AK (dev1)"
 
 #

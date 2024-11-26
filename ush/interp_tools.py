@@ -8,13 +8,21 @@ import numpy as np
 from netCDF4 import Dataset
 
 #Create date range, this is later used to search for RAVE and HWP from previous 24 hours
-def date_range(current_day):
+def date_range(current_day, ebb_dcycle):
     print(f'Searching for interpolated RAVE for {current_day}')
+    print('EBB CYCLE:',ebb_dcycle)
     
     fcst_datetime = dt.datetime.strptime(current_day, "%Y%m%d%H")
-    start_datetime = fcst_datetime - dt.timedelta(days=1, hours=1)
     
-    fcst_dates = pd.date_range(start=start_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
+    if ebb_dcycle == 1:
+       print('Find  RAVE for ebb_dcyc 1')
+       fcst_dates = pd.date_range(start=fcst_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
+       #start_datetime = fcst_datetime - dt.timedelta(days=1) 
+       #fcst_dates = pd.date_range(start=start_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
+    else:   
+       start_datetime = fcst_datetime - dt.timedelta(days=1, hours=1)
+    
+       fcst_dates = pd.date_range(start=start_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
 
     print(f'Current cycle: {fcst_datetime}')
     return(fcst_dates)
@@ -167,6 +175,30 @@ def generate_regrider(rave_avail_hours, srcfield, tgtfield, weightfile, inp_file
 
     return(regridder, use_dummy_emiss)
 
+
+#Masks the edges of the data array to remove artifacts due to interpolation method on the top and bottom boundaries.
+def mask_edges(data, mask_width=1):
+    """
+    param data: numpy array, the data to mask
+    param mask_width: int, the width of the mask at each edge
+    return: numpy array, the masked data
+    """
+    original_shape = data.shape
+    if mask_width < 1:
+        return data  # No masking if mask_width is less than 1
+
+    # Mask top and bottom rows
+    data[:mask_width, :] = np.nan
+    data[-mask_width:, :] = np.nan
+
+    # Mask left and right columns
+    data[:, :mask_width] = np.nan
+    data[:, -mask_width:] = np.nan
+    assert data.shape == original_shape, "Data shape altered during masking."
+
+    return(data)
+
+
 #process RAVE available for interpolation
 def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_emis, regridder, 
                     srcgrid, tgtgrid, rave_to_intp, intp_dir, src_latt, tgt_latt, tgt_lont, cols, rows):
@@ -180,7 +212,7 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
             try:
                 with xr.open_dataset(rave_file_path, decode_times=False) as ds_togrid:
                     try:
-                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE']]
+                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25']]
                     except KeyError as e:
                         print(f"Missing required variables in {rave_file_path}: {e}")
                         continue
@@ -203,17 +235,22 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
                                     src_QA = xr.where(ds_togrid['FRE'] > 1000, src_rate, 0.0)
                                     srcfield.data[...] = src_QA[0, :, :]
                                     tgtfield = regridder(srcfield, tgtfield)
+                                    masked_tgt_data = mask_edges(tgtfield.data, mask_width=1)
 
                                     if svar == 'FRP_MEAN':
                                         Store_by_Level(fout, 'frp_avg_hr', 'Mean Fire Radiative Power', 'MW', '3D', '0.f', '1.f')
-                                        tgt_rate = tgtfield.data
+                                        tgt_rate =  masked_tgt_data 
                                         fout.variables['frp_avg_hr'][0, :, :] = tgt_rate
                                         print('=============after regridding===========' + svar)
-                                        print(np.sum(tgt_rate))
+                                        print(np.nansum(tgt_rate))
                                     elif svar == 'FRE':
                                         Store_by_Level(fout, 'FRE', 'FRE', 'MJ', '3D', '0.f', '1.f')
-                                        tgt_rate = tgtfield.data
+                                        tgt_rate =  masked_tgt_data 
                                         fout.variables['FRE'][0, :, :] = tgt_rate
+                                    elif svar == 'PM25':
+                                        Store_by_Level(fout, 'PM25', 'PM25', 'MJ', '3D', '0.f', '1.f')
+                                        tgt_rate =  masked_tgt_data  
+                                        fout.variables['PM25'][0, :, :] = tgt_rate    
                                 except (ValueError, KeyError) as e:
                                     print(f"Error processing variable {svar} in {rave_file_path}: {e}")
                     except (OSError, IOError, RuntimeError, FileNotFoundError, TypeError, IndexError, MemoryError) as e:

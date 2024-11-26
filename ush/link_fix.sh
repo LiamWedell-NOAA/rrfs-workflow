@@ -108,7 +108,7 @@ function link_fix() {
 #
 # Create symlinks in the FIXLAM directory pointing to the grid files.
 # These symlinks are needed by the make_orog, make_sfc_climo, make_ic,
-# make_lbc, and/or forecast tasks.
+# make_lbc, and/or run_fcst tasks.
 #
 # Note that we check that each target file exists before attempting to 
 # create symlinks.  This is because the "ln" command will create sym-
@@ -253,7 +253,7 @@ Creating links in the FIXLAM directory to the grid files..."
     "C*${DOT_OR_USCORE}oro_data.tile${TILE_RGNL}.halo${NH0}.nc" \
     "C*${DOT_OR_USCORE}oro_data.tile${TILE_RGNL}.halo${NH4}.nc" \
         )
-    suites=( "FV3_HRRR" "FV3_RAP" "FV3_HRRR_gf" "FV3_GFS_v15_thompson_mynn_lam3km" "RRFS_sas" )
+    suites=( "FV3_HRRR" "FV3_RAP" "FV3_HRRR_gf" "FV3_GFS_v15_thompson_mynn_lam3km" )
     if [[ ${suites[@]} =~ "${CCPP_PHYS_SUITE}" ]] ; then
       fns+=( \
       "C*${DOT_OR_USCORE}oro_data_ss.tile${TILE_RGNL}.halo${NH0}.nc" \

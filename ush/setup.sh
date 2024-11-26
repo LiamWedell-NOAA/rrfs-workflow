@@ -42,7 +42,7 @@ local func_name="${FUNCNAME[0]}"
 #
 #-----------------------------------------------------------------------
 #
-USHrrfs="${scrfunc_dir}"
+USHdir="${scrfunc_dir}"
 #
 #-----------------------------------------------------------------------
 #
@@ -50,7 +50,7 @@ USHrrfs="${scrfunc_dir}"
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/source_util_funcs.sh
+. $USHdir/source_util_funcs.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -58,13 +58,13 @@ USHrrfs="${scrfunc_dir}"
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/set_cycle_dates.sh
-. $USHrrfs/set_gridparams_GFDLgrid.sh
-. $USHrrfs/set_gridparams_ESGgrid.sh
-. $USHrrfs/link_fix.sh
-. $USHrrfs/set_ozone_param.sh
-. $USHrrfs/set_thompson_mp_fix_files.sh
-. $USHrrfs/check_ruc_lsm.sh
+. $USHdir/set_cycle_dates.sh
+. $USHdir/set_gridparams_GFDLgrid.sh
+. $USHdir/set_gridparams_ESGgrid.sh
+. $USHdir/link_fix.sh
+. $USHdir/set_ozone_param.sh
+. $USHdir/set_thompson_mp_fix_files.sh
+. $USHdir/check_ruc_lsm.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -83,7 +83,7 @@ USHrrfs="${scrfunc_dir}"
 #-----------------------------------------------------------------------
 #
 EXPT_DEFAULT_CONFIG_FN="config_defaults.sh"
-. $USHrrfs/${EXPT_DEFAULT_CONFIG_FN}
+. $USHdir/${EXPT_DEFAULT_CONFIG_FN}
 #
 #-----------------------------------------------------------------------
 #
@@ -106,11 +106,11 @@ if [ -f "${EXPT_CONFIG_FN}" ]; then
 # configuration file are also assigned default values in the default 
 # configuration file.
 #
-  . $USHrrfs/compare_config_scripts.sh
+  . $USHdir/compare_config_scripts.sh
 #
 # Now source the user-specified configuration file.
 #
-  . $USHrrfs/${EXPT_CONFIG_FN}
+  . $USHdir/${EXPT_CONFIG_FN}
 #
 fi
 #
@@ -120,7 +120,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/valid_param_vals.sh
+. $USHdir/valid_param_vals.sh
 #
 #-----------------------------------------------------------------------
 #
@@ -225,23 +225,23 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-# Make sure that RUN_TASK_PRDGEN is set to a valid value.
+# Make sure that RUN_TASK_RUN_PRDGEN is set to a valid value.
 #
 #-----------------------------------------------------------------------
 #
 check_var_valid_value \
-  "RUN_TASK_PRDGEN" "valid_vals_RUN_TASK_PRDGEN"
+  "RUN_TASK_RUN_PRDGEN" "valid_vals_RUN_TASK_RUN_PRDGEN"
 #
-# Set RUN_TASK_PRDGEN to either "TRUE" or "FALSE" so we don't
+# Set RUN_TASK_RUN_PRDGEN to either "TRUE" or "FALSE" so we don't
 # have to consider other valid values later on.
 #
-RUN_TASK_PRDGEN=${RUN_TASK_PRDGEN^^}
-if [ "${RUN_TASK_PRDGEN}" = "TRUE" ] || \
-   [ "${RUN_TASK_PRDGEN}" = "YES" ]; then
-  RUN_TASK_PRDGEN="TRUE"
-elif [ "${RUN_TASK_PRDGEN}" = "FALSE" ] || \
-     [ "${RUN_TASK_PRDGEN}" = "NO" ]; then
-  RUN_TASK_PRDGEN="FALSE"
+RUN_TASK_RUN_PRDGEN=${RUN_TASK_RUN_PRDGEN^^}
+if [ "${RUN_TASK_RUN_PRDGEN}" = "TRUE" ] || \
+   [ "${RUN_TASK_RUN_PRDGEN}" = "YES" ]; then
+  RUN_TASK_RUN_PRDGEN="TRUE"
+elif [ "${RUN_TASK_RUN_PRDGEN}" = "FALSE" ] || \
+     [ "${RUN_TASK_RUN_PRDGEN}" = "NO" ]; then
+  RUN_TASK_RUN_PRDGEN="FALSE"
 fi
 #
 #-----------------------------------------------------------------------
@@ -484,31 +484,35 @@ optionList[0]=DO_DACYCLE
 optionList[1]=DO_SURFACE_CYCLE
 optionList[2]=DO_RETRO
 optionList[3]=LBCS_ICS_ONLY
-optionList[4]=DO_ANALYSIS_NONVARCLD
-optionList[5]=SAVE_CYCLE_LOG
-optionList[6]=DO_SOIL_ADJUST
-optionList[7]=DO_UPDATE_BC
-optionList[8]=DO_RADDA
-optionList[9]=DO_RECENTER
-optionList[10]=DO_BUFRSND
-optionList[11]=USE_RRFSE_ENS
-optionList[12]=DO_SMOKE_DUST
-optionList[13]=DO_POST_PROD
-optionList[14]=DO_POST_SPINUP
-optionList[15]=DO_PARALLEL_PRDGEN
-optionList[16]=DO_ENSEMBLE
-optionList[17]=DO_ENSINIT
-optionList[18]=DO_ENSFCST
-optionList[19]=DO_SAVE_INPUT
-optionList[20]=DO_SAVE_DA_OUTPUT
-optionList[21]=DO_ENS_RADDA
-optionList[22]=DO_GSIDIAG_OFFLINE
-optionList[23]=USE_CLM
-optionList[24]=DO_ENSFCST_MULPHY
-optionList[25]=DO_GLM_FED_DA
-optionList[26]=GLMFED_DATA_MODE
-optionList[27]=EBB_DCYCLE
-optionList[28]=PREP_MODEL_FOR_FED
+optionList[4]=DO_NONVAR_CLDANAL
+optionList[5]=DO_REFL2TTEN
+optionList[6]=SAVE_CYCLE_LOG
+optionList[7]=DO_SOIL_ADJUST
+optionList[8]=DO_UPDATE_BC
+optionList[9]=DO_RADDA
+optionList[10]=DO_RECENTER
+optionList[11]=DO_BUFRSND
+optionList[12]=USE_RRFSE_ENS
+optionList[13]=DO_JEDI_ENVAR_IODA
+optionList[14]=DO_SMOKE_DUST
+optionList[15]=DO_POST_PROD
+optionList[16]=DO_POST_SPINUP
+optionList[17]=DO_PARALLEL_PRDGEN
+optionList[18]=DO_ENSEMBLE
+optionList[19]=DO_ENSINIT
+optionList[20]=DO_ENSFCST
+optionList[21]=DO_SAVE_INPUT
+optionList[22]=DO_SAVE_DA_OUTPUT
+optionList[23]=DO_ENS_RADDA
+optionList[24]=DO_GSIDIAG_OFFLINE
+optionList[25]=USE_CLM
+optionList[26]=DO_PM_DA
+optionList[27]=DO_ENSFCST_MULPHY
+optionList[28]=DO_GLM_FED_DA
+optionList[29]=GLMFED_DATA_MODE
+optionList[30]=DO_IODA_PREPBUFR
+optionList[31]=EBB_DCYCLE
+optionList[32]=PREP_MODEL_FOR_FED
 
 obs_number=${#optionList[@]}
 for (( i=0; i<${obs_number}; i++ ));
@@ -553,7 +557,7 @@ case $MACHINE in
     SCHED="pbspro"
     QUEUE_DEFAULT=${QUEUE_DEFAULT:-"dev"}
     QUEUE_HPSS=${QUEUE_HPSS:-"dev_transfer"}
-    QUEUE_FORECAST=${QUEUE_FORECAST:-"dev"}
+    QUEUE_FCST=${QUEUE_FCST:-"dev"}
     QUEUE_ANALYSIS=${QUEUE_ANALYSIS:-"dev"}
     QUEUE_PRDGEN=${QUEUE_PRDGEN:-"dev"}
     QUEUE_POST=${QUEUE_POST:-"dev"}
@@ -566,8 +570,8 @@ case $MACHINE in
     QUEUE_DEFAULT=${QUEUE_DEFAULT:-"batch"}
     PARTITION_HPSS=${PARTITION_HPSS:-"service"}
     QUEUE_HPSS=${QUEUE_HPSS:-"batch"}
-    PARTITION_FORECAST=${PARTITION_FORECAST:-"hera"}
-    QUEUE_FORECAST=${QUEUE_FORECAST:-"batch"}
+    PARTITION_FCST=${PARTITION_FCST:-"hera"}
+    QUEUE_FCST=${QUEUE_FCST:-"batch"}
     QUEUE_PRDGEN=${QUEUE_PRDGEN:-"batch"}
     QUEUE_POST=${QUEUE_POST:-"batch"}
     ;;
@@ -579,8 +583,8 @@ case $MACHINE in
     QUEUE_DEFAULT=${QUEUE_DEFAULT:-"batch"}
     PARTITION_HPSS=${PARTITION_HPSS:-"service"}
     QUEUE_HPSS=${QUEUE_HPSS:-"batch"}
-    PARTITION_FORECAST=${PARTITION_FORECAST:-"orion"}
-    QUEUE_FORECAST=${QUEUE_FORECAST:-"batch"}
+    PARTITION_FCST=${PARTITION_FCST:-"orion"}
+    QUEUE_FCST=${QUEUE_FCST:-"batch"}
     ;;
 
   "HERCULES")
@@ -590,8 +594,8 @@ case $MACHINE in
     QUEUE_DEFAULT=${QUEUE_DEFAULT:-"batch"}
     PARTITION_HPSS=${PARTITION_HPSS:-"service"}
     QUEUE_HPSS=${QUEUE_HPSS:-"batch"}
-    PARTITION_FORECAST=${PARTITION_FORECAST:-"hercules"}
-    QUEUE_FORECAST=${QUEUE_FORECAST:-"batch"}
+    PARTITION_FCST=${PARTITION_FCST:-"hercules"}
+    QUEUE_FCST=${QUEUE_FCST:-"batch"}
     ;;
 
   "JET")
@@ -601,8 +605,10 @@ case $MACHINE in
     QUEUE_DEFAULT=${QUEUE_DEFAULT:-"batch"}
     PARTITION_HPSS=${PARTITION_HPSS:-"service"}
     QUEUE_HPSS=${QUEUE_HPSS:-"batch"}
-    PARTITION_FORECAST=${PARTITION_FORECAST:-"sjet,vjet,kjet,xjet"}
-    QUEUE_FORECAST=${QUEUE_FORECAST:-"batch"}
+    PARTITION_FCST=${PARTITION_FCST:-"sjet,vjet,kjet,xjet"}
+    QUEUE_FCST=${QUEUE_FCST:-"batch"}
+    PARTITION_GRAPHICS=${PARTITION_GRAPHICS:-"kjet,xjet"}
+    QUEUE_GRAPHICS=${QUEUE_GRAPHICS:-"batch"}
     PARTITION_ANALYSIS=${PARTITION_ANALYSIS:-"vjet,kjet,xjet"}
     QUEUE_ANALYSIS=${QUEUE_ANALYSIS:-"batch"}
     PARTITION_PRDGEN=${PARTITION_PRDGEN:-"sjet,vjet,kjet,xjet"}
@@ -783,16 +789,25 @@ NUM_CYCLES="${#ALL_CDATES[@]}"
 # Set various directories.
 #
 # HOMErrfs:
-# Top directory of the clone of the RRFS workflow git repository.
+# Top directory of the clone of the FV3-LAM workflow git repository.
 #
-# USHrrfs:
+# USHdir:
 # Directory containing the shell scripts called by the workflow.
 #
-# SORCrrfs:
+# SCRIPTSdir:
+# Directory containing the ex scripts called by the workflow.
+#
+# JOBSdir:
+# Directory containing the jjobs scripts called by the workflow.
+#
+# SORCdir:
 # Directory containing various source codes.
 #
-# PARMrrfs:
+# PARMdir:
 # Directory containing parameter files, template files, etc.
+#
+# EXECdir:
+# Directory containing various executable files.
 #
 # LIB64dir:
 # Directory containing various library files.
@@ -803,17 +818,27 @@ NUM_CYCLES="${#ALL_CDATES[@]}"
 #-----------------------------------------------------------------------
 #
 HOMErrfs=${scrfunc_dir%/*}
-FIXrrfs="$HOMErrfs/fix"
-USHrrfs="$HOMErrfs/ush"
-SORCrrfs="$HOMErrfs/sorc"
-PARMrrfs="$HOMErrfs/parm"
+USHdir="$HOMErrfs/ush"
+SCRIPTSdir="$HOMErrfs/scripts"
+JOBSdir="$HOMErrfs/jobs"
+SORCdir="$HOMErrfs/sorc"
+PARMdir="$HOMErrfs/parm"
 MODULES_DIR="$HOMErrfs/modulefiles"
+EXECdir="$HOMErrfs/exec"
 LIB64dir="$HOMErrfs/sorc/build/lib64"
 
 FIXgsm=${FIXgsm:-"$HOMErrfs/fix/am"}
 FIXLAM_NCO_BASEDIR=${FIXLAM_NCO_BASEDIR:-"$HOMErrfs/fix/lam"}
-AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrrfs/gsi}"}
-SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrrfs/gsi}"}
+FIX_GSI=${FIX_GSI:-"${HOMErrfs}/fix/gsi"}
+FIX_UPP=${FIX_UPP:-"${HOMErrfs}/fix/upp"}
+FIXprdgen=${FIXprdgen:-"$HOMErrfs/fix/prdgen"}
+FIX_CRTM=${FIX_CRTM:-"${CRTM_FIX}"}
+FIX_UPP_CRTM=${FIX_UPP_CRTM:-"${CRTM_FIX}"}
+FIX_SMOKE_DUST=${FIX_SMOKE_DUST:-"${HOMErrfs}/fix/smoke_dust"}
+FIX_BUFRSND=${FIX_BUFRSND:-"${HOMErrfs}/fix/bufrsnd"}
+AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIX_GSI}"}
+SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIX_GSI}"}
+PARM_IODACONV=${PARM_IODACONV:-"${HOMErrfs}/parm/iodaconv"}
 
 case $MACHINE in
 
@@ -875,7 +900,7 @@ property_name="local_path"
 #
 # Get the base directory of the FV3 forecast model code.
 #
-UFS_WTHR_MDL_DIR="${SORCrrfs}/ufs-weather-model"
+UFS_WTHR_MDL_DIR="${SORCdir}/ufs-weather-model"
 if [ ! -d "${UFS_WTHR_MDL_DIR}" ]; then
   print_err_msg_exit "\
 The base directory in which the FV3 source code should be located
@@ -887,7 +912,7 @@ fi
 #
 # Get the base directory of the UFS_UTILS codes.
 #
-UFS_UTILS_DIR="${SORCrrfs}/UFS_UTILS"
+UFS_UTILS_DIR="${SORCdir}/UFS_UTILS"
 if [ ! -d "${UFS_UTILS_DIR}" ]; then
   print_err_msg_exit "\
 The base directory in which the UFS utilities source codes should be lo-
@@ -899,12 +924,24 @@ fi
 #
 # Get the base directory of the UPP code.
 #
-UPP_DIR="${SORCrrfs}/UPP"
+UPP_DIR="${SORCdir}/UPP"
 if [ ! -d "${UPP_DIR}" ]; then
   print_err_msg_exit "\
 The base directory in which the UPP source code should be located
 (UPP_DIR) does not exist:
   UPP_DIR = \"${UPP_DIR}\"
+Please clone the external repository containing the code in this directory,
+build the executable, and then rerun the workflow."
+fi
+#
+# Get the base directory of the Python Graphics code.
+#
+PYTHON_GRAPHICS_DIR="${HOMErrfs}/python_graphics"
+if [ ! -d "${PYTHON_GRAPHICS_DIR}" ]; then
+  print_err_msg_exit "
+The base directory in which the Python Graphics source code should be located
+(PYTHON_GRAPHICS_DIR) does not exist:
+  PYTHON_GRAPHICS_DIR = \"${PYTHON_GRAPHICS_DIR}\"
 Please clone the external repository containing the code in this directory,
 build the executable, and then rerun the workflow."
 fi
@@ -1018,7 +1055,7 @@ LBC_SPEC_FCST_LONG_HRS=($( seq 0 ${LBC_SPEC_INTVL_HRS} \
 #-----------------------------------------------------------------------
 #
 if [ ! -z "${PREDEF_GRID_NAME}" ]; then
-  . $USHrrfs/set_predef_grid_params.sh
+  . $USHdir/set_predef_grid_params.sh
 fi
 #
 #-----------------------------------------------------------------------
@@ -1110,7 +1147,6 @@ fi
 GWD_HRRRsuite_DIR=""
 if [ "${CCPP_PHYS_SUITE}" = "FV3_HRRR" ] || \
    [ "${CCPP_PHYS_SUITE}" = "FV3_HRRR_gf" ]  || \
-   [ "${CCPP_PHYS_SUITE}" = "RRFS_sas" ]  || \
    [ "${CCPP_PHYS_SUITE}" = "FV3_RAP" ]  || \
    [ "${CCPP_PHYS_SUITE}" = "FV3_GFS_v15_thompson_mynn_lam3km" ]; then
   #
@@ -1245,31 +1281,31 @@ check_for_preexist_dir_file "$EXPTDIR" "${PREEXISTING_DIR_METHOD}"
 # FIXcrtm:
 # This is the directory that will contain the coefficient files for CRTM
 #
-# DATAROOT:
-# The directory containing the working directories.
+# CYCLE_BASEDIR:
+# The base directory in which the directories for the various cycles will
+# be placed.
 #
-# ENSCTRL_DATAROOT:
-# The base directory of the control member for EnKF recentering.
+# ENSCTRL_CYCLE_BASEDIR:
+# The base directory of the control member for EnKF recentering, in which
+# the directories for the various cycles will be placed.
 #
 # COMROOT:
-# This is the full path to the "com" directory under which 
-# output from the POST_TN task will be placed.  Note that this output
+# In NCO mode, this is the full path to the "com" directory under which 
+# output from the RUN_POST_TN task will be placed.  Note that this output
 # is not placed directly under COMROOT but several directories further
 # down.  More specifically, for a cycle starting at yyyymmddhh, it is at
 #
 #   $COMROOT/$NET/$envir/$RUN.$yyyymmdd/$hh
 #
-# Below, we set COMROOT in terms of PTMP as COMROOT="$PTMP/com".
+# Below, we set COMROOT in terms of PTMP as COMROOT="$PTMP/com".  COMOROOT 
+# is not used by the workflow in community mode.
 #
-# GESROOT:
-# The beginning portion of the directory that will contain the output
-# files from the forecast for a given cycle.  For a cycle
-# that starts on the date specified by yyyymmdd and hour specified by hh
-# (where yyyymmdd and hh are as described above), the directory in which
-# the forecast output files will be placed will be:
-#   $GESROOT/$RUN.$yyyymmdd/$hh
+# COMOUT_BASEDIR:
+# In NCO mode, this is the base directory directly under which the output 
+# from the RUN_POST_TN task will be placed, i.e. it is the cycle-independent 
+# portion of the RUN_POST_TN task's output directory.  It is given by
 #
-# Below, we set GESROOT in terms of PTMP as GESROOT="$PTMP/nwges".
+#   $COMROOT/$NET/$envir
 #
 #-----------------------------------------------------------------------
 #
@@ -1283,19 +1319,23 @@ FIXsmokedust="${EXPTDIR}/fix_smoke_dust"
 FIXbufrsnd="${EXPTDIR}/fix_bufrsnd"
 SST_ROOT="${SST_ROOT}"
 
-DATAROOT="$STMP"
-check_for_preexist_dir_file "${DATAROOT}" "${PREEXISTING_DIR_METHOD}"
-ENSCTRL_DATAROOT="${ENSCTRL_STMP}"
-COMROOT="${PTMP}/com"
-ENSCTRL_COMROOT="${ENSCTRL_PTMP}/com"
-ENSCTRL_COMOUT="${ENSCTRL_COMROOT}/${NET}/${rrfs_ver}/${RUN_ensctrl}.@Y@m@d"
-GESROOT="${PTMP}/nwges"
-LOG_BASEDIR="${PTMP}/logs"
+CYCLE_BASEDIR="$STMP"
+check_for_preexist_dir_file "${CYCLE_BASEDIR}" "${PREEXISTING_DIR_METHOD}"
+ENSCTRL_CYCLE_BASEDIR="${ENSCTRL_STMP}"
+COMROOT="$PTMP"
+ENSCTRL_COMROOT="${ENSCTRL_PTMP}"
+COMOUT_BASEDIR="$COMROOT/prod"
+ENSCTRL_COMOUT_BASEDIR="${ENSCTRL_COMROOT}/prod"
+ENSCTRL_COMOUT_DIR="${ENSCTRL_COMOUT_BASEDIR}/${RUN_ensctrl}.@Y@m@d"
+NWGES_BASEDIR="$NWGES"
+ENSCTRL_NWGES_BASEDIR="${ENSCTRL_NWGES}"
+RRFSE_NWGES_BASEDIR="${RRFSE_NWGES}"
+LOG_BASEDIR="${COMROOT}/logs"
 #
 #-----------------------------------------------------------------------
 #
-# The RRFS model needs the following input files in the run directory
-# to start a forecast:
+# The FV3 forecast model needs the following input files in the run di-
+# rectory to start a forecast:
 #
 #   (1) The data table file
 #   (2) The diagnostics table file
@@ -1344,14 +1384,14 @@ FIELD_TABLE_TMPL_FN="${FIELD_TABLE_FN}${dot_ccpp_phys_suite_or_null}"
 MODEL_CONFIG_TMPL_FN="${MODEL_CONFIG_FN}"
 UFS_CONFIG_TMPL_FN="${UFS_CONFIG_FN}"
 
-DATA_TABLE_TMPL_FP="${PARMrrfs}/${DATA_TABLE_TMPL_FN}"
-DIAG_TABLE_TMPL_FP="${PARMrrfs}/${DIAG_TABLE_TMPL_FN}"
-FIELD_TABLE_TMPL_FP="${PARMrrfs}/${FIELD_TABLE_TMPL_FN}"
-FV3_NML_BASE_SUITE_FP="${PARMrrfs}/${FV3_NML_BASE_SUITE_FN}"
-FV3_NML_YAML_CONFIG_FP="${PARMrrfs}/${FV3_NML_YAML_CONFIG_FN}"
+DATA_TABLE_TMPL_FP="${PARMdir}/${DATA_TABLE_TMPL_FN}"
+DIAG_TABLE_TMPL_FP="${PARMdir}/${DIAG_TABLE_TMPL_FN}"
+FIELD_TABLE_TMPL_FP="${PARMdir}/${FIELD_TABLE_TMPL_FN}"
+FV3_NML_BASE_SUITE_FP="${PARMdir}/${FV3_NML_BASE_SUITE_FN}"
+FV3_NML_YAML_CONFIG_FP="${PARMdir}/${FV3_NML_YAML_CONFIG_FN}"
 FV3_NML_BASE_ENS_FP="${EXPTDIR}/${FV3_NML_BASE_ENS_FN}"
-MODEL_CONFIG_TMPL_FP="${PARMrrfs}/${MODEL_CONFIG_TMPL_FN}"
-UFS_CONFIG_TMPL_FP="${PARMrrfs}/${UFS_CONFIG_TMPL_FN}"
+MODEL_CONFIG_TMPL_FP="${PARMdir}/${MODEL_CONFIG_TMPL_FN}"
+UFS_CONFIG_TMPL_FP="${PARMdir}/${UFS_CONFIG_TMPL_FN}"
 #
 #-----------------------------------------------------------------------
 #
@@ -1506,7 +1546,7 @@ ENSMEM_NAMES=("")
 FV3_NML_ENSMEM_FPS=("")
 if [ "${DO_ENSEMBLE}" = "TRUE" ]; then
 #  NDIGITS_ENSMEM_NAMES="${#NUM_ENS_MEMBERS}"
-  NDIGITS_ENSMEM_NAMES="3"
+  NDIGITS_ENSMEM_NAMES="4"
 # Strip away all leading zeros in NUM_ENS_MEMBERS by converting it to a 
 # decimal (leading zeros will cause bash to interpret the number as an 
 # octal).  Note that the variable definitions file will therefore contain
@@ -1526,7 +1566,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-FV3_EXEC_FP="${HOMErrfs}/exec/${FV3_EXEC_FN}"
+FV3_EXEC_FP="${EXECdir}/${FV3_EXEC_FN}"
 #
 #-----------------------------------------------------------------------
 #
@@ -1538,7 +1578,7 @@ FV3_EXEC_FP="${HOMErrfs}/exec/${FV3_EXEC_FN}"
 #
 #-----------------------------------------------------------------------
 #
-WFLOW_LAUNCH_SCRIPT_FP="$USHrrfs/${WFLOW_LAUNCH_SCRIPT_FN}"
+WFLOW_LAUNCH_SCRIPT_FP="$USHdir/${WFLOW_LAUNCH_SCRIPT_FN}"
 WFLOW_LAUNCH_LOG_FP="$EXPTDIR/${WFLOW_LAUNCH_LOG_FN}"
 if [ "${USE_CRON_TO_RELAUNCH}" = "TRUE" ]; then
   CRONTAB_LINE="*/${CRON_RELAUNCH_INTVL_MNTS} * * * * cd $EXPTDIR && \
@@ -1554,7 +1594,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-LOAD_MODULES_RUN_TASK_FP="$USHrrfs/load_modules_run_task.sh"
+LOAD_MODULES_RUN_TASK_FP="$USHdir/load_modules_run_task.sh"
 #
 #-----------------------------------------------------------------------
 #
@@ -1670,32 +1710,32 @@ check_var_valid_value \
 #
 #-----------------------------------------------------------------------
 #
-# Make sure GFS_FILE_FMT_ICS is set to a valid value.
+# Make sure FV3GFS_FILE_FMT_ICS is set to a valid value.
 #
 #-----------------------------------------------------------------------
 #
-if [ "${EXTRN_MDL_NAME_ICS}" = "GFS" ]; then
+if [ "${EXTRN_MDL_NAME_ICS}" = "FV3GFS" ]; then
   err_msg="\
-The file format for GFS external model files specified in GFS_-
+The file format for FV3GFS external model files specified in FV3GFS_-
 FILE_FMT_ICS is not supported:
-  GFS_FILE_FMT_ICS = \"${GFS_FILE_FMT_ICS}\""
+  FV3GFS_FILE_FMT_ICS = \"${FV3GFS_FILE_FMT_ICS}\""
   check_var_valid_value \
-    "GFS_FILE_FMT_ICS" "valid_vals_GFS_FILE_FMT_ICS" "${err_msg}"
+    "FV3GFS_FILE_FMT_ICS" "valid_vals_FV3GFS_FILE_FMT_ICS" "${err_msg}"
 fi
 #
 #-----------------------------------------------------------------------
 #
-# Make sure GFS_FILE_FMT_LBCS is set to a valid value.
+# Make sure FV3GFS_FILE_FMT_LBCS is set to a valid value.
 #
 #-----------------------------------------------------------------------
 #
-if [ "${EXTRN_MDL_NAME_LBCS}" = "GFS" ]; then
+if [ "${EXTRN_MDL_NAME_LBCS}" = "FV3GFS" ]; then
   err_msg="\
-The file format for GFS external model files specified in GFS_-
+The file format for FV3GFS external model files specified in FV3GFS_-
 FILE_FMT_LBCS is not supported:
-  GFS_FILE_FMT_LBCS = \"${GFS_FILE_FMT_LBCS}\""
+  FV3GFS_FILE_FMT_LBCS = \"${FV3GFS_FILE_FMT_LBCS}\""
   check_var_valid_value \
-    "GFS_FILE_FMT_LBCS" "valid_vals_GFS_FILE_FMT_LBCS" "${err_msg}"
+    "FV3GFS_FILE_FMT_LBCS" "valid_vals_FV3GFS_FILE_FMT_LBCS" "${err_msg}"
 fi
 #
 #-----------------------------------------------------------------------
@@ -1705,7 +1745,7 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-. $USHrrfs/set_extrn_mdl_params.sh
+. $USHdir/set_extrn_mdl_params.sh
 
 #
 #-----------------------------------------------------------------------
@@ -2012,25 +2052,25 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-# Calculate the number of nodes (NNODES_FORECAST) to request from the job
-# scheduler for the forecast task (FORECAST_TN).  This is just PE_MEMBER01
+# Calculate the number of nodes (NNODES_RUN_FCST) to request from the job
+# scheduler for the forecast task (RUN_FCST_TN).  This is just PE_MEMBER01
 # dividied by the number of processes per node we want to request for this
-# task (PPN_FORECAST), then rounded up to the nearest integer, i.e.
+# task (PPN_RUN_FCST), then rounded up to the nearest integer, i.e.
 #
-#   NNODES_FORECAST = ceil(PE_MEMBER01/PPN_FORECAST)
+#   NNODES_RUN_FCST = ceil(PE_MEMBER01/PPN_RUN_FCST)
 #
 # where ceil(...) is the ceiling function, i.e. it rounds its floating
 # point argument up to the next larger integer.  Since in bash, division
 # of two integers returns a truncated integer, and since bash has no
 # built-in ceil(...) function, we perform the rounding-up operation by
 # adding the denominator (of the argument of ceil(...) above) minus 1 to
-# the original numerator, i.e. by redefining NNODES_FORECAST to be
+# the original numerator, i.e. by redefining NNODES_RUN_FCST to be
 #
-#   NNODES_FORECAST = (PE_MEMBER01 + PPN_FORECAST - 1)/PPN_FORECAST
+#   NNODES_RUN_FCST = (PE_MEMBER01 + PPN_RUN_FCST - 1)/PPN_RUN_FCST
 #
 #-----------------------------------------------------------------------
 #
-NNODES_FORECAST=$(( (PE_MEMBER01 + PPN_FORECAST - 1)/PPN_FORECAST ))
+NNODES_RUN_FCST=$(( (PE_MEMBER01 + PPN_RUN_FCST - 1)/PPN_RUN_FCST ))
 
 #
 #-----------------------------------------------------------------------
@@ -2087,13 +2127,13 @@ set_thompson_mp_fix_files \
 #
 # 1) Copying the default workflow/experiment configuration file (speci-
 #    fied by EXPT_DEFAULT_CONFIG_FN and located in the shell script di-
-#    rectory specified by USHrrfs) to the experiment directory and rena-
+#    rectory specified by USHdir) to the experiment directory and rena-
 #    ming it to the name specified by GLOBAL_VAR_DEFNS_FN.
 #
 # 2) Resetting the default variable values in this file to their current
 #    values.  This is necessary because these variables may have been 
 #    reset by the user-specified configuration file (if one exists in 
-#    USHrrfs) and/or by this setup script, e.g. because predef_domain is
+#    USHdir) and/or by this setup script, e.g. because predef_domain is
 #    set to a valid non-empty value.
 #
 # 3) Appending to the variable definitions file any new variables intro-
@@ -2107,7 +2147,7 @@ set_thompson_mp_fix_files \
 #-----------------------------------------------------------------------
 #
 GLOBAL_VAR_DEFNS_FP="$EXPTDIR/$GLOBAL_VAR_DEFNS_FN"
-cp $USHrrfs/${EXPT_DEFAULT_CONFIG_FN} ${GLOBAL_VAR_DEFNS_FP}
+cp $USHdir/${EXPT_DEFAULT_CONFIG_FN} ${GLOBAL_VAR_DEFNS_FP}
 #
 #-----------------------------------------------------------------------
 #
@@ -2186,7 +2226,7 @@ read -r str_to_insert << EOM
 #-----------------------------------------------------------------------
 # Section 1:
 # This section is a copy of the default workflow/experiment configuration 
-# file config_defaults.sh in the shell scripts directory USHrrfs except 
+# file config_defaults.sh in the shell scripts directory USHdir except 
 # that variable values have been updated to those set by the setup
 # script (setup.sh).
 #-----------------------------------------------------------------------
@@ -2384,27 +2424,37 @@ CRONTAB_LINE="${CRONTAB_LINE}"
 #-----------------------------------------------------------------------
 #
 HOMErrfs="$HOMErrfs"
-USHrrfs="$USHrrfs"
-SORCrrfs="$SORCrrfs"
-PARMrrfs="$PARMrrfs"
+USHdir="$USHdir"
+SCRIPTSdir="$SCRIPTSdir"
+JOBSdir="$JOBSdir"
+SORCdir="$SORCdir"
+PARMdir="$PARMdir"
 MODULES_DIR="${MODULES_DIR}"
+EXECdir="$EXECdir"
 LIB64dir="$LIB64dir"
 FIXam="$FIXam"
 FIXLAM="$FIXLAM"
 FIXgsm="$FIXgsm"
+FIXprdgen="$FIXprdgen"
 COMROOT="$COMROOT"
-GESROOT="${GESROOT}"
+COMOUT_BASEDIR="${COMOUT_BASEDIR}"
+NWGES_BASEDIR="${NWGES_BASEDIR}"
 UFS_WTHR_MDL_DIR="${UFS_WTHR_MDL_DIR}"
 UFS_UTILS_DIR="${UFS_UTILS_DIR}"
 SFC_CLIMO_INPUT_DIR="${SFC_CLIMO_INPUT_DIR}"
 TOPO_DIR="${TOPO_DIR}"
 UPP_DIR="${UPP_DIR}"
+PYTHON_GRAPHICS_DIR="${PYTHON_GRAPHICS_DIR}"
 
+ARCHIVEDIR="${ARCHIVEDIR}"
+NCARG_ROOT="${NCARG_ROOT}"
+NCL_HOME="${NCL_HOME}"
+NCL_REGION="${NCL_REGION}"
 MODEL="${MODEL}"
 
 EXPTDIR="$EXPTDIR"
 LOG_BASEDIR="${LOG_BASEDIR}"
-DATAROOT="${DATAROOT}"
+CYCLE_BASEDIR="${CYCLE_BASEDIR}"
 GRID_DIR="${GRID_DIR}"
 OROG_DIR="${OROG_DIR}"
 SFC_CLIMO_DIR="${SFC_CLIMO_DIR}"
@@ -2423,8 +2473,14 @@ GLMFED_EAST_ROOT="${GLMFED_EAST_ROOT}"
 GLMFED_WEST_ROOT="${GLMFED_WEST_ROOT}"
 ENKF_FCST="${ENKF_FCST}"
 
+FIX_GSI="${FIX_GSI}"
+FIX_CRTM="${FIX_CRTM}"
+FIX_UPP_CRTM="${FIX_UPP_CRTM}"
+FIX_SMOKE_DUST="${FIX_SMOKE_DUST}"
+FIX_BUFRSND="${FIX_BUFRSND}"
 AIRCRAFT_REJECT="${AIRCRAFT_REJECT}"
 SFCOBS_USELIST="${SFCOBS_USELIST}"
+PARM_IODACONV="${PARM_IODACONV}"
 
 RADARREFL_MINS=( $(printf "\"%s\" " "${RADARREFL_MINS[@]}" ))
 RADARREFL_TIMELEVEL=( $(printf "\"%s\" " "${RADARREFL_TIMELEVEL[@]}" ))

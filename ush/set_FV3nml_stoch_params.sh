@@ -9,7 +9,7 @@
 # member directory housed within each cycle directory in ${EXPTDIR}.
 # Files of any two ensemble members differ only in their stochastic "seed" 
 # parameter values.  These namelist files are generated when this file is
-# called as part of the FORECAST_TN task. 
+# called as part of the RUN_FCST_TN task. 
 #
 #-----------------------------------------------------------------------
 #
@@ -124,7 +124,7 @@ function set_FV3nml_stoch_params() {
     }"
   fi
 
-  $USHrrfs/set_namelist.py -q \
+  $USHdir/set_namelist.py -q \
                           -n ${fv3_nml_ensmem_fp_base} \
                           -u "$settings" \
                           -o ${fv3_nml_ensmem_fp} || \
