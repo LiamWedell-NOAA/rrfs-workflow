@@ -686,7 +686,12 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ] && [ "${CYCLE_TYPE}" = "spinup" ]; then  # cy
   fi
 fi
 
-#No DA, no spin up cycle, smoke/dust cycling RETROS
+#-----------------------------------------------------------------------
+#
+#  smoke/dust cycling for Retros
+#
+#-----------------------------------------------------------------------
+
 if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
       surface_file_dir_name=fcst_fv3lam
       bkpath_find="missing"
@@ -741,7 +746,7 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
         fi
         echo "${YYYYMMDDHH}(${CYCLE_TYPE}): cycle smoke/dust from ${checkfile} " >> ${EXPTDIR}/log.cycles
       fi
-cat << EOF > add_smoke.py
+ cat << EOF > add_smoke.py
 import xarray as xr
 import numpy as np
 import os
@@ -808,12 +813,12 @@ def main():
     file_input['smoke'] = smoke_zero
     file_input['dust'] = dust_zero
     file_input['coarsepm']= coarsepm_zero
+    file_input.close()
 
     # Populate the variables with the adjusted data
     file_input['smoke'][1:66,:,:] = smoke_2_add
     file_input['dust'][1:66,:,:] = dust_2_add
     file_input['coarsepm'][1:66,:,:] = coarsepm_2_add
-    file_input.close()
 
     # Save the modified dataset back to the file
     file_input.to_netcdf(target_file, mode='w')
@@ -830,10 +835,9 @@ if __name__ == "__main__":
 
 EOF
 
-/contrib/anaconda/anaconda3/latest/bin/python  add_smoke.py
-fi
-# ends smoke/dust cycling RETROS
-
+#/contrib/anaconda/anaconda3/latest/bin/python  add_smoke.py
+/scratch1/BMC/acomp/Johana/miniconda/bin/python add_smoke.py
+fi     
 #
 #-----------------------------------------------------------------------
 #

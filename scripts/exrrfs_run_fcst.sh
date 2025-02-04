@@ -256,7 +256,7 @@ fi
 # wave drag parameterization in that suite.  Below, create symlinks to these 
 # files in the run directory.
 #
-suites=( "RRFS_sas" "FV3_RAP" "FV3_HRRR" "FV3_HRRR_gf" "FV3_GFS_v15_thompson_mynn_lam3km" "FV3_GFS_v17_p8" )
+suites=( "FV3_RAP" "FV3_HRRR" "FV3_HRRR_gf" "FV3_GFS_v15_thompson_mynn_lam3km" "FV3_GFS_v17_p8" )
 if [[ ${suites[@]} =~ "${CCPP_PHYS_SUITE}" ]] ; then
   fileids=( "ss" "ls" )
   for fileid in "${fileids[@]}"; do
@@ -391,8 +391,13 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
   if [ -f ${smokefile} ]; then
     ln -snf ${smokefile} ${run_dir}/INPUT/SMOKE_RRFS_data.nc
   else
-    ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_24hr_smoke.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc
-    echo "WARNING: Smoke file is not available, use dummy_24hr_smoke.nc instead"
+    if [ ${EBB_DCYCLE} = "1" ]; then
+       ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_24hr_smoke_ebbdc1.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc
+       echo "WARNING: Smoke file is not available, use dummy_24hr_smoke_ebbdc1.nc instead"
+    else
+       ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_24hr_smoke.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc
+       echo "WARNING: Smoke file is not available, use dummy_24hr_smoke.nc instead"
+    fi   
   fi
 fi
 #

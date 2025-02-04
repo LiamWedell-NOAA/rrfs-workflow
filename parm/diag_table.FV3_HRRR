@@ -419,12 +419,36 @@
 "gfs_dyn",     "coarsepm_ave",    "coarsepm_ave",  "fv3_history2d",  "all",  .false.,  "none",  2
 
 # Aerosols emission for smoke
+"gfs_phys",    "vegfrac",      "vegfrac",       "fv3_history",    "all",  .false.,  "none",  2
 "gfs_sfc",     "emdust",       "emdust",        "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "coef_bb_dc",   "coef_bb_dc",    "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "min_fplume",   "min_fplume",    "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "max_fplume",   "max_fplume",    "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "wmax_plume",   "wmax_plume",    "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "hwp",          "hwp",           "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "hwp_ave",      "hwp_ave",       "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_sfc",     "frp_output",   "frp_output",    "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "uspdavg",      "uspdavg",       "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "fire_type",    "fire_type",     "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "fire_end_hr",  "fire_end_hr",   "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "fhist",        "fhist",         "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "lu_qfire",     "lu_qfire",      "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "lu_nofire",    "lu_nofire",     "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "peak_hr",      "peak_hr",       "fv3_history2d",  "all",  .false.,  "none",  2
 "gfs_phys",    "ebu_smoke",    "ebu_smoke",     "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "rho_dry",      "rho_dry",       "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "w_plume",      "w_plume",       "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "w_plume2",     "w_plume2",      "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "w_plume3",     "w_plume3",      "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "exch_m",       "exch_m",        "fv3_history",    "all",  .false.,  "none",  2
+"gfs_phys",    "exch_h",       "exch_h",        "fv3_history",    "all",  .false.,  "none",  2
 "gfs_phys",    "ext550",       "ext550",        "fv3_history",    "all",  .false.,  "none",  2
+"gfs_sfc",     "drydep_smoke", "drydep_smoke",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "drydep_dust", "drydep_dust",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",     "drydep_coarsepm", "drydep_coarsepm",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpr_smoke", "wetdpr_smoke",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpr_dust", "wetdpr_dust",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpr_coarsepm", "wetdpr_coarsepm",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpc_smoke", "wetdpc_smoke",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpc_dust", "wetdpc_dust",  "fv3_history2d",  "all",  .false.,  "none",  2
+"gfs_sfc",    "wetdpc_coarsepm", "wetdpc_coarsepm",  "fv3_history2d",  "all",  .false.,  "none",  2

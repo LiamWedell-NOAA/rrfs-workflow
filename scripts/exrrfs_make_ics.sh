@@ -284,9 +284,7 @@ case "${CCPP_PHYS_SUITE}" in
   "FV3_HRRR" | \
   "FV3_HRRR_gf" | \
   "FV3_HRRR_gf_nogwd" | \
-  "FV3_RAP" | \
-  "RRFS_sas" | \
-  "RRFS_sas_nogwd" )
+  "FV3_RAP" )
     if [ "${EXTRN_MDL_NAME_ICS}" = "RAP" ] || \
        [ "${EXTRN_MDL_NAME_ICS}" = "HRRRDAS" ] || \
        [ "${EXTRN_MDL_NAME_ICS}" = "HRRR" ]; then
@@ -637,9 +635,9 @@ case "${EXTRN_MDL_NAME_ICS}" in
   geogrid_file_input_grid="${FIXgsm}/geo_em.d01.nc_RAPX"
   vgtyp_from_climo=False
   sotyp_from_climo=False
-  vgfrc_from_climo=False
-  minmax_vgfrc_from_climo=False
-  lai_from_climo=False
+  vgfrc_from_climo=True
+  minmax_vgfrc_from_climo=True
+  lai_from_climo=True
   tg3_from_soil=True
   convert_nst=False
   ;;

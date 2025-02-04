@@ -132,15 +132,13 @@ fi
 # Check whether the RAVE files need to be split into hourly files
 # Format the current day and hour properly for UTC
 if [ "$ebb_dc" -eq 1 ]; then
-    ddhh_to_use="${YYYYMMDDm1}${HH}"  #"${current_day}${current_hh}"
-    dd_to_use=${YYYYMMDDm1} #"${current_day}"
+    ddhh_to_use="${current_day}${current_hh}"
+    dd_to_use="${current_day}"
 else
-    ddhh_to_use="${YYYYMMDDm1}${HH}"  #"${previous_day}${prev_hh}"
-    dd_to_use=${YYYYMMDDm1}  #"${previous_day}"
+    ddhh_to_use="${previous_day}${prev_hh}"
+    dd_to_use="${previous_day}"
 fi
 
-echo "Cheking ddhh_to_use" ${ddhh_to_use}
-echo "checking dd_to_use" ${dd_to_use}
 # Construct file names and check their existence
 intp_fname="${fire_rave_dir_work}/RAVE-HrlyEmiss-3km_v2r0_blend_s${ddhh_to_use}00000_e${dd_to_use}23*"
 intp_fname_beta="${fire_rave_dir_work}/Hourly_Emissions_3km_${ddhh_to_use}00_${dd_to_use}23*"
@@ -199,13 +197,13 @@ fi
 # is maintained there for future cycles.
 # Function to check if all files in the directory are older than 15 days
 
-are_all_files_older_than_5_days() {
-    find "$1" -type f -mtime -2 | read
+are_all_files_older_than_15_days() {
+    find "$1" -type f -mtime -15 | read
     return $?
 }
 
 # Check if all files in the rave_nwges_dir are older than 5 days
-if are_all_files_older_than_5_days "${rave_nwges_dir}"; then
+if are_all_files_older_than_15_days "${rave_nwges_dir}"; then
     echo "All files are older than 5 days. Replacing all files."
 
     # Loop through all files in the work directory and replace them in rave_nwges_dir
@@ -257,4 +255,5 @@ In directory:    \"${scrfunc_dir}\"
 #-----------------------------------------------------------------------
 #
 { restore_shell_opts; } > /dev/null 2>&1
+
 

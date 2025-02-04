@@ -882,6 +882,9 @@ You can specify the missing location(s) in config.sh"
     ;;
 
 esac
+
+echo 'GWD_HRRRsuite_BASEDIR HERA TEST', ${FIXLAM_NCO_BASEDIR}
+sleep 60
 #
 #-----------------------------------------------------------------------
 #

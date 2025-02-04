@@ -21,6 +21,7 @@ valid_vals_PREDEF_GRID_NAME=( \
 "GSL_HAFSV0.A_3km" \
 "GSD_HRRR_AK_50km" \
 "GSD_RAP13km" \
+"RRFS_WA_1km" \
 "RRFS_NA_3km" \
 "RRFS_FIREWX_1.5km" \
 )
@@ -32,8 +33,6 @@ valid_vals_CCPP_PHYS_SUITE=( \
 "FV3_HRRR_gf_nogwd" \
 "FV3_RAP" \
 "FV3_GFS_v15_thompson_mynn_lam3km" \
-"RRFS_sas" \
-"RRFS_sas_nogwd" \
 ) 
 valid_vals_GFDLgrid_RES=("48" "96" "192" "384" "768" "1152" "3072")
 valid_vals_EXTRN_MDL_NAME_ICS=("GSMGFS" "FV3GFS" "RAP" "HRRR" "NAM" "HRRRDAS" "GEFS" "GDASENKF" "RRFS")

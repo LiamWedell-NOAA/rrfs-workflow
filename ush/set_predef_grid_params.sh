@@ -193,7 +193,7 @@ case ${PREDEF_GRID_NAME} in
 
   if [ "$QUILTING" = "TRUE" ]; then
     WRTCMP_write_groups="${WRTCMP_write_groups:-1}"
-    WRTCMP_write_tasks_per_group=$(( 2*LAYOUT_Y ))
+    WRTCMP_write_tasks_per_group=$(( 4*LAYOUT_Y ))
     WRTCMP_output_grid="${WRTCMP_output_grid:-lambert_conformal}"
     WRTCMP_cen_lon="${ESGgrid_LON_CTR}"
     WRTCMP_cen_lat="${ESGgrid_LAT_CTR}"
@@ -205,6 +205,45 @@ case ${PREDEF_GRID_NAME} in
     WRTCMP_lat_lwr_left="21.138123"
     WRTCMP_dx="${ESGgrid_DELX}"
     WRTCMP_dy="${ESGgrid_DELY}"
+  fi
+  ;;
+#
+#-----------------------------------------------------------------------
+#
+# A 1km grid over Washington US centered over [47.956067, -118.641752] willimas flats fire
+# C10009
+#-----------------------------------------------------------------------
+#
+#
+"RRFS_WA_1km")
+
+  GRID_GEN_METHOD="ESGgrid"
+  ESGgrid_LON_CTR="-118.641752"
+  ESGgrid_LAT_CTR="47.956067"
+  ESGgrid_DELX="1000.0"
+  ESGgrid_DELY="1000.0"
+  ESGgrid_NX="600"
+  ESGgrid_NY="600"
+  ESGgrid_PAZI="0.0"
+  ESGgrid_WIDE_HALO_WIDTH="6"
+  DT_ATMOS="6"
+  LAYOUT_X="20"
+  LAYOUT_Y="20"
+  BLOCKSIZE="40"
+  if [ "$QUILTING" = "TRUE" ]; then
+    WRTCMP_write_groups="1"
+    WRTCMP_write_tasks_per_group="$(( 2*LAYOUT_Y ))"
+    WRTCMP_output_grid="lambert_conformal"
+    WRTCMP_cen_lon="-118.641752"
+    WRTCMP_cen_lat="47.956067"
+    WRTCMP_stdlat1="47.956067"
+    WRTCMP_stdlat2="47.956067"
+    WRTCMP_nx="600"
+    WRTCMP_ny="600"
+    WRTCMP_lon_lwr_left="-122.761050"
+    WRTCMP_lat_lwr_left="45.244341"
+    WRTCMP_dx="1000.0"
+    WRTCMP_dy="1000.0"
   fi
   ;;
 #
@@ -865,8 +904,8 @@ case ${PREDEF_GRID_NAME} in
   BLOCKSIZE="${BLOCKSIZE:-28}"
 
   if [ "$QUILTING" = "TRUE" ]; then
-    WRTCMP_write_groups="${WRTCMP_write_groups:-1}"
-    WRTCMP_write_tasks_per_group="${WRTCMP_write_tasks_per_group:-50}"
+    WRTCMP_write_groups="${WRTCMP_write_groups:-3}"
+    WRTCMP_write_tasks_per_group="${WRTCMP_write_tasks_per_group:-120}"
     WRTCMP_output_grid="${WRTCMP_output_grid:-rotated_latlon}"
     if [ "${WRTCMP_output_grid}" = "rotated_latlon" ]; then
       WRTCMP_cen_lon="-113.0"

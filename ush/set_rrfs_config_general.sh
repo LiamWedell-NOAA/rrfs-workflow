@@ -31,7 +31,7 @@ if [[ $MACHINE == "jet" ]] ; then
   fi
 
 elif [[ $MACHINE == "hera" ]] ; then
-  ACCOUNT="zrtrr"
+  ACCOUNT="ap-fc"
   PARTITION_DEFAULT=""
   PARTITION_FCST=""
   QUEUE_ANALYSIS="batch"
@@ -198,9 +198,9 @@ if [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_3km" ]] ; then
 
   elif [[ $MACHINE == "hera" ]] ; then
     LAYOUT_X="15"
-    LAYOUT_Y="20"
-    PPN_RUN_FCST="20"
-    NNODES_RUN_FCST="16"
+    LAYOUT_Y="40"
+    PPN_RUN_FCST="40"
+    NNODES_RUN_FCST="19"
     PPN_MAKE_ICS="20"
     PPN_BLEND_ICS="8"
     PPN_MAKE_LBCS="20"
@@ -219,7 +219,7 @@ if [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_3km" ]] ; then
 
     WTIME_MAKE_LBCS="00:30:00"
     WTIME_RUN_PREPSTART="00:10:00"
-    WTIME_RUN_FCST="00:45:00"
+    WTIME_RUN_FCST="02:45:00"
     WTIME_RUN_FCST_LONG="02:30:00"
     WTIME_RUN_ANALYSIS="00:30:00"
 
@@ -313,7 +313,37 @@ if [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_3km" ]] ; then
     PPN_RUN_FCST="40"
     WTIME_RUN_PRDGEN="00:20:00"
   fi
+elif [[ ${PREDEF_GRID_NAME} == "RRFS_WA_1km" ]] ; then
+  CCPP_PHYS_SUITE="FV3_HRRR"
+  if [[ $MACHINE == "hera" ]] ; then
+    LAYOUT_X="20"
+    LAYOUT_Y="20"
+    PPN_RUN_FCST="20"
+    NNODES_RUN_FCST="16"
+    PPN_MAKE_ICS="20"
+    PPN_MAKE_LBCS="20"
+    NNODES_MAKE_ICS="3"
+    NNODES_MAKE_LBCS="3"
+    TPP_RUN_FCST="2"
+    PPN_RUN_POST="40"
+    NNODES_RUN_POST="2"
+    PPN_RUN_NONVARCLDANL="10"
+    NNODES_RUN_NONVARCLDANL="10"
+    PPN_RUN_GSIDIAG=40
+    PPN_RUN_ENKF="2"
+    NNODES_RUN_RECENTER="5"
+    PPN_RUN_RECENTER="40"
 
+    WTIME_MAKE_LBCS="00:30:00"
+    WTIME_RUN_PREPSTART="00:10:00"
+    WTIME_RUN_FCST="02:45:00"
+    WTIME_RUN_FCST_LONG="02:30:00"
+    WTIME_RUN_ANAL="00:10:00"
+
+    START_TIME_SPINUP="01:10:00"
+    START_TIME_PROD="02:10:00"
+    START_TIME_LATE_ANALYSIS="01:40:00"
+  fi
 elif [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_13km" ]] ; then 
   DT_ATMOS=120
   ADDNL_OUTPUT_GRIDS=()
@@ -431,7 +461,7 @@ elif [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_13km" ]] ; then
 
 elif [[ ${PREDEF_GRID_NAME} == "RRFS_NA_3km" ]] ; then 
   DT_ATMOS=36
-  CCPP_PHYS_SUITE="RRFS_sas"
+  CCPP_PHYS_SUITE="FV3_HRRR_gf"
   ADDNL_OUTPUT_GRIDS=( "hrrr" "hrrrak" )
   TILE_LABELS="NA hrrr_regions1 hrrr_regions2 hrrr_tiles1 hrrr_tiles2 hrrr_tiles3 \
     hrrr_tiles4 hrrrak_tiles"
@@ -547,13 +577,13 @@ elif [[ ${PREDEF_GRID_NAME} == "RRFS_NA_3km" ]] ; then
     CLEAN_NWGES_HRS="18"
 
   elif [[ $MACHINE == "hera" ]] ; then
-    CCPP_PHYS_SUITE="FV3_HRRR"
-    WRTCMP_write_groups="1"
-    WRTCMP_write_tasks_per_group="50"
-    LAYOUT_X="50"
-    LAYOUT_Y="20"
+    CCPP_PHYS_SUITE="FV3_HRRR_gf"
+    WRTCMP_write_groups="3"
+    WRTCMP_write_tasks_per_group="120"
+    LAYOUT_X="40"
+    LAYOUT_Y="30"
     PPN_RUN_FCST="10"
-    NNODES_RUN_FCST="105"
+    NNODES_RUN_FCST="144"
     TPP_RUN_FCST="4"
     PPN_RUN_NONVARCLDANL="10"
     NNODES_RUN_NONVARCLDANL="20"

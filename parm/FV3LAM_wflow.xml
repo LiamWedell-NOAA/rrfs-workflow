@@ -519,8 +519,8 @@ MODULES_RUN_TASK_FP script.
     <dependency>
       <and>
         <timedep><cyclestr offset="&START_TIME_PROCSMOKE;">@Y@m@d@H@M00</cyclestr></timedep>
-	{%- if do_retro %}
-	<datadep age="00:00:01:00"><cyclestr offset="-{{ da_cycle_interval_hrs }}:00:00">&FG_ROOT;/@Y@m@d@H/fcst_fv3lam/RESTART/</cyclestr><cyclestr>@Y@m@d.@H0000.coupler.res</cyclestr></datadep>
+        {%- if do_retro %}
+        <datadep age="00:00:01:00"><cyclestr offset="-{{ da_cycle_interval_hrs }}:00:00">&FG_ROOT;/@Y@m@d@H/fcst_fv3lam/RESTART/</cyclestr><cyclestr>@Y@m@d.@H0000.coupler.res</cyclestr></datadep>
         {%- endif %}
       </and>
     </dependency>
@@ -1110,11 +1110,7 @@ MODULES_RUN_TASK_FP script.
 ************************************************************************
 ************************************************************************
 -->
- {%- if do_ensinit %}
   <task name="&PREP_CYC_SPINUP_TN;_ensinit{{ uscore_ensmem_name }}" cycledefs="spinupcyc" maxtries="{{ maxtries_run_prepstart }}">
- {% else %}
-  <task name="&PREP_CYC_SPINUP_TN;{{ uscore_ensmem_name }}" cycledefs="spinupcyc" maxtries="{{ maxtries_run_prepstart }}">
- {%- endif %}
 
     &RSRV_DEFAULT;
     &WALL_LIMIT_PRE;

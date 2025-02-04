@@ -13,7 +13,7 @@ load(pathJoin("stack-intel-oneapi-mpi", os.getenv("stack_impi_ver") or "2021.5.1
 load(pathJoin("crtm", os.getenv("crtm_ver") or "2.4.0"))
 
 prepend_path("MODULEPATH","/contrib/miniconda3/modulefiles")
-load(pathJoin("miniconda3", os.getenv("miniconda3_ver") or "4.12.0"))
+load(pathJoin("miniconda3", os.getenv("miniconda3_ver") or "4.5.12"))
 
 if mode() == "load" then
    LmodMsgRaw([===[Please do the following to activate conda:
