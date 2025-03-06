@@ -10,14 +10,13 @@ from netCDF4 import Dataset
 #Create date range, this is later used to search for RAVE and HWP from previous 24 hours
 def date_range(current_day, ebb_dcycle):
     print(f'Searching for interpolated RAVE for {current_day}')
-    print('EBB CYCLE:',ebb_dcycle)
     
     fcst_datetime = dt.datetime.strptime(current_day, "%Y%m%d%H")
     
     if ebb_dcycle == 1:
-       print('Find  RAVE for ebb_dcyc 1')
-       fcst_dates = pd.date_range(start=fcst_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
-       #start_datetime = fcst_datetime - dt.timedelta(days=1) 
+        print('Find  RAVE for ebb_dcyc: 1')
+        fcst_dates = pd.date_range(start=fcst_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
+        #start_datetime = fcst_datetime - dt.timedelta(days=1) 
        #fcst_dates = pd.date_range(start=start_datetime, periods=24, freq='H').strftime("%Y%m%d%H")
     else:   
        start_datetime = fcst_datetime - dt.timedelta(days=1, hours=1)
@@ -30,6 +29,7 @@ def date_range(current_day, ebb_dcycle):
 # Check if interoplated RAVE is available for the previous 24 hours
 def check_for_intp_rave(intp_dir, fcst_dates, rave_to_intp):
     intp_avail_hours = []
+    print('searching for interpol files here:',intp_dir)
     intp_non_avail_hours = []
     # There are four situations here.
     #   1) the file is missing (interpolate a new file)
@@ -201,7 +201,7 @@ def mask_edges(data, mask_width=1):
 
 #process RAVE available for interpolation
 def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_emis, regridder, 
-                    srcgrid, tgtgrid, rave_to_intp, intp_dir, src_latt, tgt_latt, tgt_lont, cols, rows):
+                    srcgrid, tgtgrid, rave_to_intp, intp_dir, src_latt, tgt_latt, tgt_lont, cols, rows, rave_qa_filter):
     for index, current_hour in enumerate(rave_avail_hours):
         file_name = rave_avail[index]
         rave_file_path = os.path.join(RAVE, file_name[0])  
@@ -212,7 +212,7 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
             try:
                 with xr.open_dataset(rave_file_path, decode_times=False) as ds_togrid:
                     try:
-                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25']]
+                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25','QA']]
                     except KeyError as e:
                         print(f"Missing required variables in {rave_file_path}: {e}")
                         continue
@@ -232,7 +232,11 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
                                     srcfield = ESMF.Field(srcgrid, name=svar, staggerloc=ESMF.StaggerLoc.CENTER)
                                     tgtfield = ESMF.Field(tgtgrid, name=svar, staggerloc=ESMF.StaggerLoc.CENTER)
                                     src_rate = ds_togrid[svar].fillna(0)
-                                    src_QA = xr.where(ds_togrid['FRE'] > 1000, src_rate, 0.0)
+                                    src_fre = xr.where(ds_togrid['FRE'] > 1000, src_rate, 0.0)
+                                    if rave_qa_filter is not None:
+                                       src_QA = xr.where(ds_togrid['QA'] < 2, 0.0, src_fre) 
+                                    else:
+                                       src_QA = src_fre  # Use original data if filtering is disabled
                                     srcfield.data[...] = src_QA[0, :, :]
                                     tgtfield = regridder(srcfield, tgtfield)
                                     masked_tgt_data = mask_edges(tgtfield.data, mask_width=1)

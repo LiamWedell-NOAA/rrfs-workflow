@@ -1985,7 +1985,7 @@ START_TIME_IODA_PREPBUFR="00:40:00"
 START_TIME_NSSLMOSIAC="00:45:00"
 START_TIME_LIGHTNINGNC="00:45:00"
 START_TIME_GLMFED="00:45:00"
-START_TIME_PROCSMOKE="00:45:00"
+START_TIME_PROCSMOKE="00:01:00"
 START_TIME_PROCPM="00:45:00"
 #
 # Memory.
@@ -2310,6 +2310,15 @@ USE_HOST_ENKF="TRUE"
 # EBB_DCYCLE:
 # 1: for retro, 2: for forecast
 #
+# HWP_ALPHA
+# 0.0: for traditional ebb_dcycle 2,else applys a smooth factor to 6hr emissions estimates
+#
+# SMOKE_CYCLE_INTERVAL
+# set cycling interval for smoke for GSL retros when spin up is not run, integer values
+#
+# RAVE_QA_FILTER
+# if TRUE set lower confidence RAVE values to zero
+#
 # USE_CLM:
 # Use CLM mode in the model
 #
@@ -2328,6 +2337,9 @@ DO_BUFRSND="FALSE"
 USE_RRFSE_ENS="FALSE"
 DO_SMOKE_DUST="FALSE"
 EBB_DCYCLE="2"
+HWP_ALPHA="0.0"
+SMOKE_CYCLE_INTERVAL="1"
+RAVE_QA_FILTER="FALSE"
 DO_PM_DA="FALSE"
 USE_CLM="FALSE"
 DO_NON_DA_RUN="FALSE"

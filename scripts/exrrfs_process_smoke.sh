@@ -79,11 +79,13 @@ ${ECHO} ${YYYYMMDD}
 ${ECHO} ${HH}
 
 # Current and previous day calculation
-current_day=`${DATE} -d "${YYYYMMDD}"`
+#current_day=`${DATE} -d "${YYYYMMDD}"`
+current_day=`${DATE} -d "${YYYYMMDD}" +"%Y-%m-%d"`
 current_hh=`${DATE} -d ${HH} +"%H"`
 
 prev_hh=`${DATE} -d "$current_hh -24 hour" +"%H"`
-previous_day=`${DATE} '+%C%y%m%d' -d "$current_day-1 days"`
+#previous_day=`${DATE} '+%C%y%m%d' -d "$current_day-1 days"`
+previous_day=`${DATE} -d "$YYYYMMDD -1 days" +"%Y-%m-%d"`
 previous_day="${previous_day} ${prev_hh}"
 
 # Number of files to process
@@ -181,6 +183,8 @@ python -u  ${USHdir}/generate_fire_emissions.py \
   "${PREDEF_GRID_NAME}" \
   "${EBB_DCYCLE}" \
   "${RESTART_INTERVAL}" \
+  "${HWP_ALPHA}"  \
+  "${RAVE_QA_FILTER}" \
 
 # Capture the return code from the previous command
 err=$?

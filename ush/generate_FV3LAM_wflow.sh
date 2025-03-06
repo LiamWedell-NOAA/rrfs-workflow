@@ -580,6 +580,9 @@ settings="\
 #
   'do_smoke_dust': ${DO_SMOKE_DUST}
   'ebb_dcycle'   : ${EBB_DCYCLE}
+  'smoke_cycle_interval_hrs' : ${SMOKE_CYCLE_INTERVAL}
+  'hwp_alpha' : ${HWP_ALPHA}
+  'rave_qa_filter' :  ${RAVE_QA_FILTER}
 #
 # PM related parameters.
 #
@@ -946,6 +949,7 @@ settings="\
     'print_diff_pgr': ${PRINT_DIFF_PGR},
     'rrfs_sd': ${DO_SMOKE_DUST},
     'ebb_dcycle': ${EBB_DCYCLE},
+    'hwp_alpha' : ${HWP_ALPHA},
   }"
 if [ "${USE_CLM}" = "TRUE" ]; then
     settings="$settings
@@ -963,6 +967,7 @@ if [ "${USE_CLM}" = "TRUE" ]; then
     'print_diff_pgr': ${PRINT_DIFF_PGR},
     'rrfs_sd': ${DO_SMOKE_DUST},
     'ebb_dcycle': ${EBB_DCYCLE},
+    'hwp_alpha' : ${HWP_ALPHA},
   }"
 fi
 #

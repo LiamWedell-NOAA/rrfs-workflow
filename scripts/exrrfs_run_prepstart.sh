@@ -699,11 +699,11 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
       if [ "${bkpath_find}" = "missing" ]; then
           restart_prefix=$( date +%Y%m%d.%H0000. -d "${START_DATE}" )
 
-          offset_hours=${DA_CYCLE_INTERV}
+          offset_hours=${SMOKE_CYCLE_INTERVAL}
           YYYYMMDDHHmInterv=$( date +%Y%m%d%H -d "${START_DATE} ${offset_hours} hours ago" )
           bkpath=${fg_root}/${YYYYMMDDHHmInterv}${SLASH_ENSMEM_SUBDIR}/${surface_file_dir_name}/RESTART
 
-          n=${DA_CYCLE_INTERV}
+          n=${SMOKE_CYCLE_INTERVAL}
           while [[ $n -le 25 ]] ; do
              if [ "${IO_LAYOUT_Y}" = "1" ]; then
                checkfile=${bkpath}/${restart_prefix}fv_tracer.res.tile1.nc
@@ -716,7 +716,7 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
                print_info_msg "$VERBOSE" "Found ${checkfile}; Use it for smoke/dust cycle "
                break
              fi
-             n=$((n + ${DA_CYCLE_INTERV}))
+             n=$((n + ${SMOKE_CYCLE_INTERVAL}))
              offset_hours=${n}
              YYYYMMDDHHmInterv=$( date +%Y%m%d%H -d "${START_DATE} ${offset_hours} hours ago" )
              bkpath=${fg_root}/${YYYYMMDDHHmInterv}${SLASH_ENSMEM_SUBDIR}/${surface_file_dir_name}/RESTART  # cycling, use background from RESTART

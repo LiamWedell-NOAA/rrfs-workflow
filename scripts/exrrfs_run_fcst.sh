@@ -394,6 +394,8 @@ if [ "${DO_SMOKE_DUST}" = "TRUE" ]; then
     if [ ${EBB_DCYCLE} = "1" ]; then
        ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_24hr_smoke_ebbdc1.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc
        echo "WARNING: Smoke file is not available, use dummy_24hr_smoke_ebbdc1.nc instead"
+    elif [ "${EBB_DCYCLE}" = "2" ] && [ "${HWP_ALPHA}" != "0" ]; then
+       ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_6hr_smoke.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc	     
     else
        ln -snf ${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}/dummy_24hr_smoke.nc ${run_dir}/INPUT/SMOKE_RRFS_data.nc
        echo "WARNING: Smoke file is not available, use dummy_24hr_smoke.nc instead"
