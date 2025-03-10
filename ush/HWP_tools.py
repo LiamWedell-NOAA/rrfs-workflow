@@ -131,11 +131,6 @@ def process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, e
     #for  block in enumerate(hwp_ave_blocks):
     #    block_shape= block.reshape(cols, rows)
     #    print("block 895,638:",block_shape[895,638])        i
-    for index, block in enumerate(hwp_ave_blocks):
-        # Reshape each block if not empty
-        if block:
-            block_array = np.sum(np.stack(block), axis=0).reshape(cols, rows)  # Sum and reshape to original grid shape
-        else:
     results=[]
     # Process the collected data into arrays
     for block in range(time_blocks):
