@@ -240,7 +240,12 @@ def produce_emiss_file(xarr_hwp, frp_avg_reshaped, totprcp_ave_arr, xarr_totprcp
 
        # Filter HWP Prcp arrays to be non-negative and replace NaNs
        filtered_hwp = xarr_hwp#.where(ebb_tot_reshaped > 0, 0).fillna(0)
-       filtered_prcp = xarr_totprcp#.where(ebb_tot_reshaped > 0, 0).fillna(0)
+
+       #sum over the time dimension only for prcp
+       sum_over_time = xarr_totprcp.sum(dim='dim_0')
+       #assign the same sum to each time step
+       filtered_prcp = sum_over_time.expand_dims(dim='t').broadcast_like(xarr_totprcp)
+
        count_frp_greater_zero = np.sum(frp_avg_reshaped > 0, axis=(1, 2))
        count_ebbgreater_zero = np.sum(ebb_tot_reshaped > 0, axis=(1, 2))
        count_fire_age_greater_zero = np.sum(fire_age > 0, axis=(1, 2))
