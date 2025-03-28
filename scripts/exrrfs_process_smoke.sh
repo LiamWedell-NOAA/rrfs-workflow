@@ -176,15 +176,29 @@ fi
 #
 #-----------------------------------------------------------------------
 #
-python -u  ${USHdir}/generate_fire_emissions.py \
-  "${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}" \
-  "${fire_rave_dir_work}" \
-  "${workdir}" \
-  "${PREDEF_GRID_NAME}" \
-  "${EBB_DCYCLE}" \
-  "${RESTART_INTERVAL}" \
-  "${HWP_ALPHA}"  \
-  "${RAVE_QA_FILTER}" \
+if [ ${EBB_DCYCLE} -eq 1] || [ "${HWP_SLPHA}" == "0.0" ]; then
+  mpirun -n 8 python ${USHdir}/smoke_dust/generate_emissions.py \
+    --staticdir "${FIXsmoke}/${PREDEF_GRID_NAME}" \
+    --ravedir "${fire_rave_dir_work}" \
+    --intp-dir "${workdir}" \
+    --predef-grid "${PREDEF_GRID_NAME}" \
+    --ebb-dcycle "${EBB_DCYCLE}" \
+    --restart-interval "${RESTART_INTERVAL}" \
+    --persistence "false" \
+    --rave-qa-filter "${RAVE_QA_FILTER}" \
+    --exit-on-error "true" \
+    --log-level "info"
+else
+  python -u  ${USHdir}/generate_fire_emissions.py \
+    "${FIX_SMOKE_DUST}/${PREDEF_GRID_NAME}" \
+    "${fire_rave_dir_work}" \
+    "${workdir}" \
+    "${PREDEF_GRID_NAME}" \
+    "${EBB_DCYCLE}" \
+    "${RESTART_INTERVAL}" \
+    "${HWP_ALPHA}"  \
+    "${RAVE_QA_FILTER}"
+fi
 
 # Capture the return code from the previous command
 err=$?
