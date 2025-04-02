@@ -1,1 +1,1 @@
-../../.agent/lam/RRFS_NA_3km_C3463_Lake_fracSV/C3463_fvcom_mask.nc
+../../.agent/lam/RRFS_NA_3km/C3463_fvcom_mask.nc
