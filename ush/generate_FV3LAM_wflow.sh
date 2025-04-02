@@ -167,11 +167,14 @@ settings="\
   'account': $ACCOUNT
   'service_account': ${SERVICE_ACCOUNT:-$ACCOUNT}
   'hpss_account': ${HPSS_ACCOUNT:-$SERVICE_ACCOUNT}
+  'cluster': ${CLUSTER}
   'reservation': $RESERVATION
   'reservation_post': $RESERVATION_POST
   'sched': $SCHED
   'partition_default': ${PARTITION_DEFAULT}
   'queue_default': ${QUEUE_DEFAULT}
+  'partition_mem': ${PARTITION_MEM}
+  'queue_mem': ${QUEUE_MEM}
   'partition_hpss': ${PARTITION_HPSS}
   'queue_hpss': ${QUEUE_HPSS}
   'partition_sfc_climo': ${PARTITION_SFC_CLIMO}

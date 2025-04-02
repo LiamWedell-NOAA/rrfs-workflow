@@ -19,6 +19,9 @@ elif [[ -d /work ]]; then
     else
       PLATFORM=orion
     fi
+elif [[ -d /gpfs ]]; then
+    PLATFORM=gaea
+    FIX_RRFS_LOCATION="/gpfs/f6/drsa-fire3/proj-shared/Liam/fix/rrfs-sd"
 else
     PLATFORM=unknown
     FIX_RRFS_LOCATION="/this/is/an/unknown/platform"

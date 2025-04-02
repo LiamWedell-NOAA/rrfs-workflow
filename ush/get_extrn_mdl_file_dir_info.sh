@@ -600,6 +600,9 @@ bination of external model (extrn_mdl_name) and analysis or forecast
     "JET")
       sysdir=""
       ;;
+    "GAEA")
+      sysdir=""
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files 
@@ -631,6 +634,9 @@ has not been specified for this external model and machine combination:
     "JET")
       sysdir="$sysbasedir"
       ;;
+    "GAEA")
+      sysdir="$sysbasedir"
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files 
@@ -653,6 +659,9 @@ has not been specified for this external model and machine combination:
        sysdir="$sysbasedir"
        ;;
     "ORION"|"HERCULES")
+       sysdir="$sysbasedir"
+       ;;
+    "GAEA")
        sysdir="$sysbasedir"
        ;;
     *)
@@ -681,6 +690,9 @@ has not been specified for this external model and machine combination:
          sysdir2="$sysdir"
       fi
       ;;
+    "GAEA")
+      sysdir="$sysbasedir/${GEFS_INPUT_SUBDIR}"
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files 
@@ -699,6 +711,9 @@ has not been specified for this external model and machine combination:
      "JET")
        sysdir="$sysbasedir/${yyyymmdd}${hh}/postprd${WRF_MEM_NAME}"
        ;;
+    "GAEA")
+      sysdir="$sysbasedir"
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files 
@@ -721,6 +736,9 @@ has not been specified for this external model and machine combination:
       sysdir="$sysbasedir"
       ;;
     "JET")
+      sysdir="$sysbasedir"
+      ;;
+    "GAEA")
       sysdir="$sysbasedir"
       ;;
     *)
@@ -748,6 +766,9 @@ has not been specified for this external model and machine combination:
     "JET")
       sysdir="$sysbasedir"
       ;;
+    "GAEA")
+      sysdir="$sysbasedir"
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files 
@@ -772,6 +793,9 @@ has not been specified for this external model and machine combination:
     "JET")
       sysdir="$sysbasedir"
       ;;
+    "GAEA")
+      sysdir="$sysbasedir"
+      ;;
     *)
       print_err_msg_exit "\
 The system directory in which to look for external model output files
@@ -794,6 +818,9 @@ has not been specified for this external model and machine combination:
       sysdir="$sysbasedir"
       ;;
     "JET")
+      sysdir="$sysbasedir"
+      ;;
+    "GAEA")
       sysdir="$sysbasedir"
       ;;
     *)
