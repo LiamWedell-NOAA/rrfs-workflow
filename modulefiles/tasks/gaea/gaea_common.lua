@@ -1,0 +1,3 @@
+
+setenv("LD_PRELOAD", "/usr/lib64/libstdc++.so.6:/lib64/libgcc_s.so.1")
+

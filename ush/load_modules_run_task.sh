@@ -105,6 +105,11 @@ if [ "${WORKFLOW_MANAGER}" != "ecflow" ]; then
 fi
 module use "${default_modules_dir}"
 
+version_file="${HOMErrfs}/versions/build.ver.${machine}"
+if [ -f ${version_file} ]; then
+  source ${version_file}
+fi
+
 if [ "${machine}" != "wcoss2" ]; then
   BUILD_MOD_FN="build_${machine}_intel"
   module load "${BUILD_MOD_FN}" || print_err_msg_exit "\

@@ -110,6 +110,10 @@ case $MACHINE in
     APRUN="srun"
     ;;
 
+  "GAEA")
+    APRUN="srun --export=ALL"
+    ;;
+
   *)
     err_exit "\
 Run command has not been specified for this machine:

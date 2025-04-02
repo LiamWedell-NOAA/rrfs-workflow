@@ -617,6 +617,24 @@ case $MACHINE in
     QUEUE_POST=${QUEUE_POST:-"batch"}
     ;;
 
+  "GAEA")
+    NCORES_PER_NODE=40
+    SCHED="${SCHED:-slurm}"
+    CLUSTER=${CLUSTER:-"--clusters=c6"}
+    PARTITION_DEFAULT=${PARTITION_DEFAULT:-"batch"}
+    QUEUE_DEFAULT=${QUEUE_DEFAULT:-"normal"}
+    PARTITION_MEM=${PARTITION_MEM:-"dtn_f5_f6"}
+    QUEUE_MEM=${QUEUE_MEM:-"dtn"}
+    PARTITION_HPSS=${PARTITION_HPSS:-"dtn_f5_f6"}
+    QUEUE_HPSS=${QUEUE_HPSS:-"hpss"}
+    PARTITION_FCST=${PARTITION_FCST:-"batch"}
+    QUEUE_FCST=${QUEUE_FCST:-"normal"}
+    PARTITION_PRDGEN=${PARTITION_PRDGEN:-"batch"}
+    QUEUE_PRDGEN=${QUEUE_PRDGEN:-"normal"}
+    PARTITION_POST=${PARTITION_POST:-"batch"}
+    QUEUE_POST=${QUEUE_POST:-"normal"}
+    ;;
+
 esac
 #
 #-----------------------------------------------------------------------
@@ -868,6 +886,13 @@ case $MACHINE in
     TOPO_DIR=${TOPO_DIR:-"/mnt/lfs4/HFIP/hfv3gfs/role.epic/UFS_SRW_data/develop/fix/fix_orog"}
     SFC_CLIMO_INPUT_DIR=${SFC_CLIMO_INPUT_DIR:-"/mnt/lfs4/HFIP/hfv3gfs/role.epic/UFS_SRW_data/develop/fix/fix_sfc_climo"}
     FIXLAM_NCO_BASEDIR=${FIXLAM_NCO_BASEDIR:-"/mnt/lfs4/HFIP/hfv3gfs/role.epic/UFS_SRW_data/develop/FV3LAM_pregen"}
+    ;;
+
+  "GAEA")
+    FIXgsm=${FIXgsm:-"/gpfs/f6/drsa-fire3/scratch/Liam.Wedell/fix/fix/fix_am"}
+    TOPO_DIR=${TOPO_DIR:-"/gpfs/f6/drsa-fire3/scratch/Liam.Wedell/fix/fix/fix_orog"}
+    SFC_CLIMO_INPUT_DIR=${SFC_CLIMO_INPUT_DIR:-"/gpfs/f6/drsa-fire3/scratch/Liam.Wedell/fix/fix/fix_sfc_climo"}
+    FIXLAM_NCO_BASEDIR=${FIXLAM_NCO_BASEDIR:-"/gpfs/f6/drsa-fire3/scratch/Liam.Wedell/fix/FV3LAM_pregen"}
     ;;
 
   *)

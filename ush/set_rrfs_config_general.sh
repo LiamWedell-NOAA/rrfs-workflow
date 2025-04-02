@@ -56,6 +56,14 @@ elif [[ $MACHINE == "hercules" ]] ; then
   QUEUE_POST="batch"
   NCORES_PER_NODE=24
 
+elif [[ $MACHINE == "gaea" ]] ; then
+  ACCOUNT="drsa-fire3"
+  PARTITION_DEFAULT=""
+  PARTITION_FCST=""
+  QUEUE_ANALYSIS="normal"
+  QUEUE_PRDGEN="normal"
+  QUEUE_GRAPHICS="normal"
+
 elif [[ $MACHINE == "wcoss2" ]] ; then
   ACCOUNT=RRFS-DEV
   HPSS_ACCOUNT="RRFS-DEV"
@@ -197,6 +205,37 @@ if [[ ${PREDEF_GRID_NAME} == "RRFS_CONUS_3km" ]] ; then
     fi
 
   elif [[ $MACHINE == "hera" ]] ; then
+    LAYOUT_X="15"
+    LAYOUT_Y="40"
+    PPN_RUN_FCST="40"
+    NNODES_RUN_FCST="19"
+    PPN_MAKE_ICS="20"
+    PPN_BLEND_ICS="8"
+    PPN_MAKE_LBCS="20"
+    NNODES_MAKE_ICS="3"
+    NNODES_BLEND_ICS="1"
+    NNODES_MAKE_LBCS="3"
+    TPP_RUN_FCST="2"
+    PPN_RUN_POST="40"
+    NNODES_RUN_POST="2"
+    PPN_RUN_NONVARCLDANL="10"
+    NNODES_RUN_NONVARCLDANL="10"
+    PPN_RUN_GSIDIAG=40
+    PPN_RUN_ENKF="2"
+    NNODES_RUN_RECENTER="5"
+    PPN_RUN_RECENTER="40"
+
+    WTIME_MAKE_LBCS="00:30:00"
+    WTIME_RUN_PREPSTART="00:10:00"
+    WTIME_RUN_FCST="02:45:00"
+    WTIME_RUN_FCST_LONG="02:30:00"
+    WTIME_RUN_ANALYSIS="00:30:00"
+
+    START_TIME_SPINUP="01:10:00"
+    START_TIME_PROD="02:10:00"
+    START_TIME_LATE_ANALYSIS="01:40:00"
+
+  elif [[ $MACHINE == "gaea" ]] ; then
     LAYOUT_X="15"
     LAYOUT_Y="40"
     PPN_RUN_FCST="40"

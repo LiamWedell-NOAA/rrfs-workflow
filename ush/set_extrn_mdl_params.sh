@@ -59,6 +59,9 @@ case ${EXTRN_MDL_NAME_ICS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS=""
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
+    ;;
   esac
   ;;
 
@@ -76,6 +79,9 @@ case ${EXTRN_MDL_NAME_ICS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS="/public/data/grids/gfs/0p25deg/grib2"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
+    ;;
   esac
   ;;
 
@@ -89,6 +95,9 @@ case ${EXTRN_MDL_NAME_ICS} in
     ;;
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS="/mnt/lfs4/BMC/public/data/grids/enkf/atm"
+    ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
     ;;
   esac
   ;;
@@ -107,6 +116,9 @@ case ${EXTRN_MDL_NAME_ICS} in
   "HERA")
     EXTRN_MDL_SYSBASEDIR_ICS="${EXTRN_MDL_SOURCE_BASEDIR_ICS:-/mnt/lfs4/BMC/public/data/grids/gens/pgrb2b}"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
+    ;;
   esac
   ;;
 
@@ -120,6 +132,9 @@ case ${EXTRN_MDL_NAME_ICS} in
     ;;
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS="/public/data/grids/rap/full/wrfnat/grib2"
+    ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
     ;;
   esac
   ;;
@@ -135,6 +150,9 @@ case ${EXTRN_MDL_NAME_ICS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS="/public/data/grids/hrrr/conus/wrfnat/grib2"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
+    ;;
   esac
   ;;
 
@@ -145,6 +163,9 @@ case ${EXTRN_MDL_NAME_ICS} in
     ;;
   "JET")
     EXTRN_MDL_SYSBASEDIR_ICS="/mnt/lfs1/BMC/wrfruc/HRRRE/cycle"
+    ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_ICS=""
     ;;
   esac
   ;;
@@ -243,6 +264,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_LBCS=""
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
+    ;;
   esac
   ;;
 
@@ -260,6 +284,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_LBCS="/public/data/grids/gfs/0p25deg/grib2"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
+    ;;
   esac
   ;;
 
@@ -270,6 +297,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
     ;;
   "JET")
     EXTRN_MDL_SYSBASEDIR_LBCS="/mnt/lfs4/BMC/public/data/grids/enkf/atm"
+    ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
     ;;
   esac
   ;;
@@ -285,6 +315,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
   "HERA")
     EXTRN_MDL_SYSBASEDIR_LBCS="${EXTRN_MDL_SOURCE_BASEDIR_LBCS:-/mnt/lfs4/BMC/public/data/grids/gens/pgrb2b}"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
+    ;;
   esac
   ;;
 
@@ -299,6 +332,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
   "JET")
     EXTRN_MDL_SYSBASEDIR_LBCS="/public/data/grids/rap/full/wrfnat/grib2"
     ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
+    ;;
   esac
   ;;
 
@@ -312,6 +348,9 @@ case ${EXTRN_MDL_NAME_LBCS} in
     ;;
   "JET")
     EXTRN_MDL_SYSBASEDIR_LBCS="/public/data/grids/hrrr/conus/wrfnat/grib2"
+    ;;
+  "GAEA")
+    EXTRN_MDL_SYSBASEDIR_LBCS=""
     ;;
   esac
   ;;
