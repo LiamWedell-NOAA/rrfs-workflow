@@ -167,7 +167,7 @@ settings="\
   'account': $ACCOUNT
   'service_account': ${SERVICE_ACCOUNT:-$ACCOUNT}
   'hpss_account': ${HPSS_ACCOUNT:-$SERVICE_ACCOUNT}
-  'cluster': ${CLUSTER}
+  'cluster': ${CLUSTER:-""}
   'reservation': $RESERVATION
   'reservation_post': $RESERVATION_POST
   'sched': $SCHED
