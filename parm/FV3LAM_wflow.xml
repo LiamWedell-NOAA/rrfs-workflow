@@ -25,7 +25,7 @@ Parameters needed by the job scheduler.
 <!ENTITY QUEUE_PRDGEN    "{{ queue_prdgen }}">
 <!ENTITY QUEUE_ANALYSIS  "{{ queue_analysis }}">
 <!ENTITY QUEUE_GRAPHICS  "{{ queue_graphics }}">
-<!ENTITY RRFS_CLUSTER    "{{ cluster }}">
+<!ENTITY RRFS_CLUSTER  {% if cluster is not none %}"{{ cluster }}"{% else %}""{% endif %}>
 <!ENTITY RRFS_RESERVE  {% if reservation %}"--reservation={{ reservation }}"{% else %}""{% endif %}>
 <!ENTITY RRFS_POST_RESERVE  {% if reservation_post %}"--reservation={{ reservation_post }}"{% else %}""{% endif %}>
 
