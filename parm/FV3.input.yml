@@ -109,6 +109,7 @@ FV3_HRRR:
     smoke_conv_wet_coef : [ 0.50, 0.50, 0.50 ]
     do_smoke_transport : true
     ebb_dcycle : 2
+    add_fire_heat_flux : true
 
   fv_diagnostics_nml:
     do_hailcast: true
@@ -217,6 +218,7 @@ FV3_HRRR_gf:
     smoke_conv_wet_coef : [ 0.50, 0.50, 0.50 ]
     do_smoke_transport : true
     ebb_dcycle : 2
+    add_fire_heat_flux : true
 
   fv_diagnostics_nml:
     do_hailcast: true
@@ -325,6 +327,7 @@ FV3_RAP:
     smoke_conv_wet_coef : [ 0.50, 0.50, 0.50 ]
     do_smoke_transport : true
     ebb_dcycle : 2
+    add_fire_heat_flux : true
 
 
 FV3_RRFS_v1beta:
