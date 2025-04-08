@@ -589,7 +589,7 @@ elif [[ ${PREDEF_GRID_NAME} == "RRFS_NA_3km" ]] ; then
     MEMO_RUN_NONVARCLDANL="256G"
     MEMO_PROC_SMOKE="256G"
     MEMO_RUN_PREPSTART="120G"
-    MEMO_PREP_CYC="40G"
+    MEMO_PREP_CYC="90G"
     MEMO_SAVE_RESTART="120G"
     MEMO_SAVE_INPUT="120G"                                                                                                     
     MEMO_RUN_PRDGEN="256G"
