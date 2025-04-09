@@ -82,7 +82,7 @@ def generate_emiss_workflow(staticdir, ravedir, newges_dir, predef_grid, ebb_dcy
            elif ebb_dcycle == 2:              
                print('Restart dates to process',fcst_dates)
                hwp_avail_hours, hwp_non_avail_hours = HWP_tools.check_restart_files(hourly_hwpdir, fcst_dates)
-               restart_avail, restart_nonavail_hours_test = HWP_tools.copy_missing_restart(nwges_dir, hwp_non_avail_hours, hourly_hwpdir)
+               restart_avail, restart_nonavail_hours_test = HWP_tools.copy_missing_restart(nwges_dir, hwp_non_avail_hours, hourly_hwpdir,len_restart_interval)
                hwp_ave_arr, xarr_hwp, totprcp_ave_arr, xarr_totprcp = HWP_tools.process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, ebb_dcycle, hwp_alpha)
                frp_avg_reshaped, ebb_tot_reshaped = femmi_tools.averaging_FRP(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug, ebb_dcycle, hwp_alpha)
                #Fire end hours processing
