@@ -148,6 +148,9 @@ def create_dummy(intp_dir, current_day, tgt_latt, tgt_lont, cols, rows):
         fout.variables['hwp_davg'][0, :, :] = dummy_file
         Store_by_Level(fout,'totprcp_24hrs','Sum of precipitation', 'm', '3D', '0.f','1.f') 
         fout.variables['totprcp_24hrs'][0, :, :] = dummy_file
+        Store_by_Level(fout,'Cloud_Fraction','Cloud_Fraction', '%', '3D', '0.f','1.f')
+        fout.variables['Cloud_Fraction'][0, :, :] = dummy_file
+
 
     return "Emissions dummy file created successfully"
 
@@ -212,7 +215,7 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
             try:
                 with xr.open_dataset(rave_file_path, decode_times=False) as ds_togrid:
                     try:
-                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25','QA']]
+                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25','QA', 'Cloud_Fraction']]
                     except KeyError as e:
                         print(f"Missing required variables in {rave_file_path}: {e}")
                         continue
@@ -252,9 +255,13 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
                                         tgt_rate =  masked_tgt_data 
                                         fout.variables['FRE'][0, :, :] = tgt_rate
                                     elif svar == 'PM25':
-                                        Store_by_Level(fout, 'PM25', 'PM25', 'MJ', '3D', '0.f', '1.f')
+                                        Store_by_Level(fout, 'PM25', 'PM25', 'kg h-1', '3D', '0.f', '1.f')
                                         tgt_rate =  masked_tgt_data  
                                         fout.variables['PM25'][0, :, :] = tgt_rate    
+                                    elif svar == 'Cloud_Fraction':
+                                        Store_by_Level(fout, 'Cloud_Fraction', 'Cloud_Fraction', '%', '3D', '0.f', '1.f')
+                                        tgt_rate =  masked_tgt_data
+                                        fout.variables['Cloud_Fraction'][0, :, :] = tgt_rate     
                                 except (ValueError, KeyError) as e:
                                     print(f"Error processing variable {svar} in {rave_file_path}: {e}")
                     except (OSError, IOError, RuntimeError, FileNotFoundError, TypeError, IndexError, MemoryError) as e:

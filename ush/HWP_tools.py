@@ -114,24 +114,60 @@ def copy_missing_restart(nwges_dir, hwp_non_avail_hours, hourly_hwpdir, len_rest
 
     return(restart_avail_hours, restart_nonavail_hours_test)
 
-def process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, ebb_dcycle, hwp_alpha):
-    if ebb_dcycle == 2 and hwp_alpha != 0.0:
-        time_blocks = 4  # 6-hourly blocks
-    elif ebb_dcycle == 2 and hwp_alpha == 0.0:
-        time_blocks = 1  # Daily blocks
-    else:
-        time_blocks = None  # EBB DC 1 does not use HWP    
-
-    # Initialize arrays for data and count of actual data points per block
-    hwp_ave_blocks = [[] for _ in range(time_blocks)]
-    totprcp_blocks = [np.zeros((cols * rows)) for _ in range(time_blocks)]
-    data_count_blocks = [np.zeros((cols, rows)) for _ in range(time_blocks)]
-    # Determine the start datetime for the forecast period
-    forecast_start = datetime.strptime(fcst_dates[0], "%Y%m%d%H")
+def process_hwp_24(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp):
+    hwp_ave = []
+    totprcp = np.zeros((cols*rows))
     var1, var2 = 'rrfs_hwp_ave', 'totprcp_ave'
 
     for cycle in fcst_dates:
-        print(f'Processing restart file for date: {cycle}')
+        try:
+            print(f'Processing restart file for date: {cycle}')
+            file_path = os.path.join(hourly_hwpdir, f"{cycle[:8]}.{cycle[8:10]}0000.phy_data.nc")
+            rave_path = os.path.join(intp_dir, f"{rave_to_intp}{cycle}00_{cycle}59.nc")
+
+            if os.path.exists(file_path) and os.path.exists(rave_path):
+                try:
+                    with xr.open_dataset(file_path) as nc:
+                        if var1 in nc.variables and var2 in nc.variables:
+                            hwp_values = nc.rrfs_hwp_ave.values.ravel()
+                            tprcp_values = nc.totprcp_ave.values.ravel()
+                            totprcp += np.where(tprcp_values > 0, tprcp_values, 0)
+                            hwp_ave.append(hwp_values)
+                            print(f'Restart file processed for: {cycle}')
+                        else:
+                            print(f'Missing variables {var1} or {var2} in file: {file_path}')
+                except (FileNotFoundError, IOError, OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
+                    print(f"Error processing NetCDF file {file_path}: {e}")
+            else:
+                print(f'One or more files non-available for this cycle: {file_path}, {rave_path}')
+        except (ValueError, TypeError) as e:
+            print(f"Error processing cycle {cycle}: {e}")
+
+    # Calculate the mean HWP values if available
+    if hwp_ave:
+        hwp_ave_arr = np.nanmean(hwp_ave, axis=0).reshape(cols, rows)
+        totprcp_ave_arr = totprcp.reshape(cols, rows)
+    else:
+        hwp_ave_arr = np.zeros((cols, rows))
+        totprcp_ave_arr = np.zeros((cols, rows))
+
+    xarr_hwp = xr.DataArray(hwp_ave_arr)
+    xarr_totprcp = xr.DataArray(totprcp_ave_arr)
+
+    return(hwp_ave_arr, xarr_hwp, totprcp_ave_arr, xarr_totprcp)
+
+def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp):
+    time_blocks = 4  # 6-hourly blocks
+
+    # Initialize arrays for data and count of actual data points per block
+    hwp_ave_blocks = [[] for _ in range(time_blocks)]
+    data_count_blocks = [np.zeros((cols, rows)) for _ in range(time_blocks)]
+    # Determine the start datetime for the forecast period
+    forecast_start = datetime.strptime(fcst_dates[0], "%Y%m%d%H")
+    var1= 'rrfs_hwp_ave'
+
+    for cycle in fcst_dates:
+        print(f'Processing restart file for date for 6 hr values: {cycle}')
 
         file_path = os.path.join(hourly_hwpdir, f"{cycle[:8]}.{cycle[8:10]}0000.phy_data.nc")
         rave_path = os.path.join(intp_dir, f"{rave_to_intp}{cycle}00_{cycle}59.nc")
@@ -140,22 +176,17 @@ def process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, e
             #with xr.open_dataset(file_path) as nc:
             with xr.open_dataset(file_path) as nc, xr.open_dataset(rave_path) as rave:
                 print('apth restart', file_path)
-                if var1 in nc.variables and var2 in nc.variables:
+                if var1 in nc.variables:
                     # Get the RAVE data as a numpy array directly
                     rave_nc = rave['frp_avg_hr'][:, :, :].values
-
-
                     # Extract and filter HWP and total precipitation data, raveling them directly
                     hwp_values = nc[var1].values
-                    tprcp_values = nc[var2].values
 
                     # Ravel the data if you need flat arrays
                     hwp_values = hwp_values.ravel()
-                    tprcp_values = tprcp_values.ravel()
                     cycle_datetime = datetime.strptime(cycle, "%Y%m%d%H")
                     elapsed_hours = int((cycle_datetime - forecast_start).total_seconds() / 3600)
                     block_index = (elapsed_hours // 6) % time_blocks
-                    totprcp_blocks[block_index] += np.where(tprcp_values > 0, tprcp_values, 0)
                     hwp_ave_blocks[block_index].append(hwp_values)
                     data_count_blocks[block_index] += 1  # Track valid data entries per pixel
                 else:
@@ -163,9 +194,6 @@ def process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, e
         else:
             print('One or more files non-available for this cycle.')
 
-    #for  block in enumerate(hwp_ave_blocks):
-    #    block_shape= block.reshape(cols, rows)
-    #    print("block 895,638:",block_shape[895,638])        i
     results=[]
     # Process the collected data into arrays
     for block in range(time_blocks):
@@ -173,20 +201,15 @@ def process_hwp(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp, e
             hwp_sum = np.sum(np.stack(hwp_ave_blocks[block]), axis=0)  # Summing the stacked arrays
             valid_counts = np.where(data_count_blocks[block] > 0, data_count_blocks[block], 1)
             hwp_ave_arr = (hwp_sum.reshape(cols, rows) / valid_counts)  # Use broadcasting safely here
-            totprcp_block= totprcp_blocks[block]
-            totprcp_ave_arr = totprcp_block.reshape(cols, rows)
-            results.append((hwp_ave_arr, xr.DataArray(hwp_ave_arr, dims=['lat', 'lon']),
-                            totprcp_ave_arr, xr.DataArray(totprcp_ave_arr, dims=['lat', 'lon'])))
+            results.append((hwp_ave_arr, xr.DataArray(hwp_ave_arr, dims=['lat', 'lon'])))
         else:
-            results.append((np.zeros((cols, rows)), xr.DataArray(np.zeros((cols, rows)), dims=['lat', 'lon']),
-                            np.zeros((cols, rows)), xr.DataArray(np.zeros((cols, rows)), dims=['lat', 'lon'])))
-    hwp_ave_arr= np.stack([res[0] for res in results], axis=0)
-    totprcp_ave_arr = np.stack([res[2] for res in results], axis=0)
+            results.append(np.zeros(cols, rows), xr.DataArray(np.zeros(cols, rows), dims=['lat', 'lon']))
+    hwp_ave_arr_dc4 = np.stack([res[0] for res in results], axis=0)
 
-    xarr_hwp = xr.DataArray(hwp_ave_arr)
-    xarr_totprcp  = xr.DataArray(totprcp_ave_arr)
+    xarr_hwp_dc4  = xr.DataArray(hwp_ave_arr_dc4)
+    print('HWP 6 hr processing',xarr_hwp_dc4.shape)
     # Return values depending on the selected ebb_dc option
-    return(hwp_ave_arr, xarr_hwp, totprcp_ave_arr, xarr_totprcp)  # A list with four elements for each 6-hourly block
+    return(hwp_ave_arr_dc4, xarr_hwp_dc4)  # A list with four elements for each 6-hourly block
 
 
 
