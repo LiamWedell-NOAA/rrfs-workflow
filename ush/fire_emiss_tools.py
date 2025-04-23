@@ -68,7 +68,7 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
     base_array = np.zeros((cols*rows))
     frp_daily = base_array
     ebb_smoke_total = []
-    cldfrac_daily = []
+    cldfrac_daily = base_array
 
     try:
         ef_map = xr.open_dataset(veg_map)
@@ -94,8 +94,8 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
                         ebb_smoke_total.append(np.where(open_frp > 0, ebb_hourly, 0).ravel())
 
                         frp_daily += np.where(open_frp > 0, open_frp, 0).ravel()
-                        cldfrac_daily += np.where(open_frp > 0, open_cldfrac, 0).ravel()
-
+                        cldfrac_daily += open_cldfrac.ravel()
+                         
                         num_files += 1
                 except (FileNotFoundError, IOError,OSError,RuntimeError,ValueError, TypeError, KeyError, IndexError, MemoryError) as e:
                     print(f"Error processing NetCDF file {file_path}: {e}")
@@ -128,7 +128,7 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
         frp_avg_reshaped = np.zeros((cols, rows))
         ebb_total_reshaped = np.zeros((cols, rows))
         cldfrac_avg_reshaped = np.zeros((cols, rows))
-
+  
     return(frp_avg_reshaped, ebb_total_reshaped, cldfrac_avg_reshaped)
 
 def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug):
@@ -150,7 +150,6 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
         try:
             hour = int(cycle[8:10])
             cycle_datetime = datetime.strptime(cycle, "%Y%m%d%H")
-            print('PRINTING HOUR',hour)
         except ValueError:
             print(f"Invalid cycle format: {cycle}")
             continue
@@ -206,10 +205,6 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
     frp_avg_reshaped_dc4 = np.stack([res[0] for res in results], axis=0)
     ebb_tot_reshaped_dc4 = np.stack([res[1] for res in results], axis=0)
     cldfrac_avg_reshaped_dc4 = np.stack([res[2] for res in results], axis=0)
-
-    print('Merged FRP shape:', frp_avg_reshaped_dc4.shape)
-    print('Merged EBB shape:', ebb_tot_reshaped_dc4.shape)
-
 
     return(frp_avg_reshaped_dc4, ebb_tot_reshaped_dc4, cldfrac_avg_reshaped_dc4)
 
@@ -297,7 +292,6 @@ def prepare_arrays(frp_avg_reshaped, ebb_tot_reshaped, fire_dur,  xarr_hwp, xarr
 '''
 
 def prepare_arrays(frp_avg_reshaped, ebb_tot_reshaped, fire_dur,  xarr_hwp, xarr_totprcp,frp_avg_reshaped_dc4, ebb_tot_reshaped_dc4,xarr_hwp_dc4,cldfrac_avg_reshaped_dc4,cldfrac_avg_reshaped):
-    print(xarr_totprcp.shape, fire_dur.shape, frp_avg_reshaped_dc4.shape, frp_avg_reshaped.shape, ebb_tot_reshaped_dc4.shape, ebb_tot_reshaped.shape, xarr_hwp_dc4.shape, xarr_hwp.shape,cldfrac_avg_reshaped_dc4.shape,cldfrac_avg_reshaped.shape)
     totprcp_input   =  np.repeat(xarr_totprcp.values[np.newaxis, :, :], repeats=5, axis=0)
     fire_dur_input  =  np.repeat(fire_dur[np.newaxis, :, :], repeats=5, axis=0)
     frp_avg_input   =  np.concatenate([frp_avg_reshaped_dc4, frp_avg_reshaped[np.newaxis, :, :]], axis=0)
@@ -356,9 +350,6 @@ def produce_emiss_file(frp_avg_input,ebb_tot_input,totprcp_input,hwp_input,fire_
     filtered_clfrac = cldfrac * mask
 
     ebb_tot_reshaped = ebb_tot_reshaped * mask
-    #fire_age = fire_age * mask
-
-    print(frp_avg_reshaped.shape, ebb_tot_reshaped.shape, fire_age.shape, filtered_hwp.shape, filtered_prcp.shape)
     # Produce emiss file
     file_path = os.path.join(intp_dir, f'SMOKE_RRFS_data_{current_day}00.nc')
     

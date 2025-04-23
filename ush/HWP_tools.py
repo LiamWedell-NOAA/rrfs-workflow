@@ -40,14 +40,11 @@ def copy_missing_restart(nwges_dir, hwp_non_avail_hours, hourly_hwpdir, len_rest
             wildcard_name = '*.phy_data.nc'
 
             if len_restart_interval > 1:
-                print('ENTERING LOOP for len_restart_interval > 1')
                 if os.path.exists(source_restart_dir):
                     matching_files_found = False
-                    print('PATH EXISTS')
                     for file in sorted(os.listdir(source_restart_dir)):
                         if fnmatch.fnmatch(file, wildcard_name):
                             matching_files_found = True
-                            print('MATCHING FILES FOUND')
                             source_file_path = os.path.join(source_restart_dir, file)
                             target_file_path = os.path.join(hourly_hwpdir, file)
                             var1, var2 = 'rrfs_hwp_ave', 'totprcp_ave'
@@ -154,6 +151,7 @@ def process_hwp_24(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp
     xarr_hwp = xr.DataArray(hwp_ave_arr)
     xarr_totprcp = xr.DataArray(totprcp_ave_arr)
 
+    print('HWP 24 avg', hwp_ave_arr.max(), xarr_hwp.max())
     return(hwp_ave_arr, xarr_hwp, totprcp_ave_arr, xarr_totprcp)
 
 def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp):
@@ -175,7 +173,7 @@ def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_int
         if os.path.exists(file_path) and os.path.exists(rave_path):
             #with xr.open_dataset(file_path) as nc:
             with xr.open_dataset(file_path) as nc, xr.open_dataset(rave_path) as rave:
-                print('apth restart', file_path)
+                print('path restart', file_path)
                 if var1 in nc.variables:
                     # Get the RAVE data as a numpy array directly
                     rave_nc = rave['frp_avg_hr'][:, :, :].values
@@ -209,7 +207,6 @@ def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_int
     hwp_ave_arr_dc4 = np.stack([res[0] for res in results], axis=0)
 
     xarr_hwp_dc4  = xr.DataArray(hwp_ave_arr_dc4)
-    print('HWP 6 hr processing',xarr_hwp_dc4.shape)
     # Return values depending on the selected ebb_dc option
     return(hwp_ave_arr_dc4, xarr_hwp_dc4)  # A list with four elements for each 6-hourly block
 
