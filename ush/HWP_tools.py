@@ -204,7 +204,8 @@ def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_int
             results.append((hwp_ave_arr, xr.DataArray(hwp_ave_arr, dims=['lat', 'lon'])))
         else:
             #results.append(np.zeros(cols, rows), xr.DataArray(np.zeros(cols, rows), dims=['lat', 'lon']))
-            results.append((np.zeros((4, cols, rows)), xr.DataArray(np.zeros((4, cols, rows)), dims=['time','lat','lon'])))
+            hwp_ave_arr = np.zeros((cols, rows))
+            results.append((hwp_ave_arr, xr.DataArray(hwp_ave_arr, dims=['lat','lon'])))
     hwp_ave_arr_dc4 = np.stack([res[0] for res in results], axis=0)
 
     xarr_hwp_dc4  = xr.DataArray(hwp_ave_arr_dc4)
