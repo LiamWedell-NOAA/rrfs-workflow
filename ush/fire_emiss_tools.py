@@ -198,7 +198,7 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
             results.append((temp_frp,ebb_total_reshaped, temp_cldfrac))
         else:
             #results.append((np.zeros((cols, rows)), np.zeros((cols, rows)), np.zeros((cols, rows))))
-            results.append((np.zeros((4,cols, rows)), np.zeros((4,cols, rows)), np.zeros((4,cols, rows))))
+            results.append((np.zeros((cols, rows)), np.zeros((cols, rows)), np.zeros((cols, rows))))
 
     time_blocks = 1  # Daily blocks
         # Stack the FRP and EBB results from all blocks along a new time dimension

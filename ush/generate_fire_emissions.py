@@ -30,7 +30,7 @@ def generate_emiss_workflow(staticdir, ravedir, newges_dir, predef_grid, ebb_dcy
    to_s = 3600
    current_day = os.environ.get("CDATE")
    nwges_dir = os.environ.get("NWGES_DIR")    
-   vars_emis = ["FRP_MEAN","FRE","PM25","QA","Cloud_Fraction"]
+   vars_emis = ["FRP_MEAN","FRE","PM25","PM2.5","QA","Cloud_Fraction"]
    cols, rows = (2700, 3950) if predef_grid == 'RRFS_NA_3km' else (1092, 1820) 
    print('PREDEF GRID',predef_grid,'cols,rows',cols,rows)
    print('WARNING, EBB_DCYCLE set to', ebb_dcycle)   

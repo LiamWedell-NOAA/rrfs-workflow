@@ -214,11 +214,20 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
         if not use_dummy_emiss and os.path.exists(rave_file_path):
             try:
                 with xr.open_dataset(rave_file_path, decode_times=False) as ds_togrid:
-                    try:
-                        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25','QA', 'Cloud_Fraction']]
-                    except KeyError as e:
-                        print(f"Missing required variables in {rave_file_path}: {e}")
+                    pm = next((v for v in ("PM25", "PM2.5") if v in ds_togrid), None)
+                    if not pm:
                         continue
+                    try:
+                        ds = ds_togrid[["FRP_MEAN", "FRE", pm, "QA", "Cloud_Fraction"]]
+                    except KeyError as e:
+                        print(f"Missing {e} in {rave_file_path}")
+                        continue
+                #with xr.open_dataset(rave_file_path, decode_times=False) as ds_togrid:
+                #    try:
+                #        ds_togrid = ds_togrid[['FRP_MEAN', 'FRE','PM25','QA', 'Cloud_Fraction']]
+                #    except KeyError as e:
+                #        print(f"Missing required variables in {rave_file_path}: {e}")
+                #        continue
 
                     output_file_path = os.path.join(intp_dir, f'{rave_to_intp}{current_hour}00_{current_hour}59.nc')
                     print('=============before regridding===========', 'FRP_MEAN')
@@ -254,7 +263,7 @@ def interpolate_rave(RAVE, rave_avail, rave_avail_hours, use_dummy_emiss, vars_e
                                         Store_by_Level(fout, 'FRE', 'FRE', 'MJ', '3D', '0.f', '1.f')
                                         tgt_rate =  masked_tgt_data 
                                         fout.variables['FRE'][0, :, :] = tgt_rate
-                                    elif svar == 'PM25':
+                                    elif svar == pm :
                                         Store_by_Level(fout, 'PM25', 'PM25', 'kg h-1', '3D', '0.f', '1.f')
                                         tgt_rate =  masked_tgt_data  
                                         fout.variables['PM25'][0, :, :] = tgt_rate    
