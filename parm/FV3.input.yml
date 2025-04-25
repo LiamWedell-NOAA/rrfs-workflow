@@ -110,6 +110,7 @@ FV3_HRRR:
     do_smoke_transport : true
     ebb_dcycle : 2
     add_fire_heat_flux : true
+    extended_sd_diags: true
 
   fv_diagnostics_nml:
     do_hailcast: true
@@ -219,6 +220,7 @@ FV3_HRRR_gf:
     do_smoke_transport : true
     ebb_dcycle : 2
     add_fire_heat_flux : true
+    extended_sd_diags: true
 
   fv_diagnostics_nml:
     do_hailcast: true
@@ -328,6 +330,7 @@ FV3_RAP:
     do_smoke_transport : true
     ebb_dcycle : 2
     add_fire_heat_flux : true
+    extended_sd_diags: true
 
 
 FV3_RRFS_v1beta:
