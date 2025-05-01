@@ -9,8 +9,7 @@ import interp_tools as i_tools
 
 #Compute average FRP from raw RAVE for the previous 24 hours
 def FRP_ebb1(ebb_dcycle, fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug, to_s):
-    base_array = np.zeros((cols*rows))
-    frp_daily = base_array
+    frp_daily = np.zeros((cols*rows))
     ebb_smoke_total = []
     ebb_smoke_hr = []
     frp_avg_hr = []
@@ -65,10 +64,9 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
     #   1) there is only on fire detection whithin 24 hours so FRP is divided by 2 
     #   2) There are more than one fire detection so the average FRP is stimated
     # ebb_smoke is always divided by the number of times a fire is detected within 24 hours window
-    base_array = np.zeros((cols*rows))
-    frp_daily = base_array
+    frp_daily = np.zeros((cols*rows))
     ebb_smoke_total = []
-    cldfrac_daily = base_array
+    cldfrac_daily = np.zeros((cols*rows))
 
     try:
         ef_map = xr.open_dataset(veg_map)
@@ -89,10 +87,12 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
                         open_fre = nc.FRE[0, :, :].values
                         open_frp = nc.frp_avg_hr[0, :, :].values
                         open_cldfrac = nc.Cloud_Fraction[0, :, :].values
-
+                        
                         ebb_hourly = open_fre * emiss_factor * beta * fg_to_ug / target_area
                         ebb_smoke_total.append(np.where(open_frp > 0, ebb_hourly, 0).ravel())
 
+                        #print('hourly FRE, FRP, CLDFRAC:',open_fre[556,955], open_frp[556,955],open_cldfrac[556,955])
+                        #print('hourly FRE, FRP, CLDFRAC:',open_fre[895,387], open_frp[895,387],open_cldfrac[895,387])
                         frp_daily += np.where(open_frp > 0, open_frp, 0).ravel()
                         cldfrac_daily += open_cldfrac.ravel()
                          
@@ -102,6 +102,7 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
         except Exception as e:
             print(f"Error processing cycle {cycle}: {e}")
 
+    #print('cloud:',cldfrac_daily[1012875])
     if num_files > 0:
         summed_array = np.sum(np.array(ebb_smoke_total), axis=0)
         num_zeros = len(ebb_smoke_total) - np.sum([arr == 0 for arr in ebb_smoke_total], axis=0)
@@ -118,17 +119,21 @@ def averaging_FRP_24(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tg
         temp_frp[num_zeros == 0] = frp_daily[num_zeros == 0]
         frp_avg_reshaped = temp_frp.reshape(cols, rows)
   
-        #cldfrac_daily 
+        #cldfrac_daily
+        #print('cloud:',cldfrac_daily[1012875])
         tmp_cldfrac = [cldfrac_daily [i] / 2 if safe_zero_count[i] == 1 else cldfrac_daily[i] / safe_zero_count[i] for i in range(len(safe_zero_count))]
         tmp_cldfrac = np.array(tmp_cldfrac)
+        #print('cloud:',tmp_cldfrac[1012875])
         tmp_cldfrac[num_zeros == 0] = cldfrac_daily[num_zeros == 0]
         cldfrac_avg_reshaped = tmp_cldfrac.reshape(cols, rows)
+        #print('cloud:',cldfrac_avg_reshaped[556,955])
         
     else:
         frp_avg_reshaped = np.zeros((cols, rows))
         ebb_total_reshaped = np.zeros((cols, rows))
         cldfrac_avg_reshaped = np.zeros((cols, rows))
-  
+    #print('Avg 24hrs: ebb_rate, FRP, CLDFRAC:',ebb_total_reshaped[556,955], frp_avg_reshaped[556,955],cldfrac_avg_reshaped[556,955])
+    #print('Avg 24hrs: ebb_rate, FRP, CLDFRAC:',ebb_total_reshaped[895,387], frp_avg_reshaped[895,387],cldfrac_avg_reshaped[895,387]) 
     return(frp_avg_reshaped, ebb_total_reshaped, cldfrac_avg_reshaped)
 
 def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, tgt_area, beta, fg_to_ug):
@@ -138,6 +143,9 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
     cldfrac_blocks = [np.zeros((cols, rows)) for _ in range(time_blocks)]
     ebb_smoke_blocks = [[] for _ in range(time_blocks)]
     data_count_blocks = [np.zeros((cols, rows)) for _ in range(time_blocks)]
+    detect_cnt_blk = [np.zeros((cols,rows), int)  for _ in range(time_blocks)] #New for detections
+    ebb_stack_blk  = [[] for _ in range(time_blocks)]  #New 
+
 
     ef_map = xr.open_dataset(veg_map)
     emiss_factor = ef_map.emiss_factor.values.reshape(cols, rows)
@@ -168,8 +176,10 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
                 ebb_hourly = open_fre * emiss_factor * beta * fg_to_ug / target_area
                 ebb_smoke_blocks[block_index].append(np.where(open_frp > 0, ebb_hourly, 0))
                 frp_blocks[block_index] += np.where(open_frp > 0, open_frp, 0)
-                cldfrac_blocks[block_index] += np.where(open_frp > 0, open_cldfrac, 0)
+                cldfrac_blocks[block_index] += open_cldfrac
                 data_count_blocks[block_index] += 1
+                mask = open_frp > 0  #NEW
+                detect_cnt_blk[block_index] += mask.astype(int) #NER
 
     results = []
     for block in range(time_blocks):
@@ -178,8 +188,10 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
             summed_array = np.sum(np.stack(ebb_smoke_blocks[block]), axis=0)
             # Count the total number of zeros
 
-            non_zero_count = np.sum(np.stack(ebb_smoke_blocks[block]) != 0, axis=0)
-            safe_zero_count = np.maximum(non_zero_count, 1)  # Avoid division by zero
+            #non_zero_count = np.sum(np.stack(ebb_smoke_blocks[block]) != 0, axis=0)
+            #safe_zero_count = np.maximum(non_zero_count, 1)  # Avoid division by zero
+            non_zero_count = detect_cnt_blk[block] #New as before I WAS USING # OF FILES
+            safe_zero_count = np.where(non_zero_count == 0, 1, non_zero_count) # NEW  
 
             #Estimate ebb rate
             result_array = np.where(safe_zero_count == 1, summed_array / 2, summed_array / safe_zero_count).reshape(cols, rows)
@@ -196,16 +208,18 @@ def averaging_FRP_dc4(fcst_dates, cols, rows, intp_dir, rave_to_intp, veg_map, t
             temp_cldfrac = np.array(temp_cldfrac)
 
             results.append((temp_frp,ebb_total_reshaped, temp_cldfrac))
+            #print('Avg four blocks: ebb_rate, FRP, CLDFRAC:',ebb_total_reshaped[556,955],temp_frp[556,955],temp_cldfrac[556,955])
+            #print('Avg four blocks: ebb_rate, FRP, CLDFRAC:',ebb_total_reshaped[895,387],temp_frp[895,387],temp_cldfrac[895,387])
         else:
-            #results.append((np.zeros((cols, rows)), np.zeros((cols, rows)), np.zeros((cols, rows))))
-            results.append((np.zeros((cols, rows)), np.zeros((cols, rows)), np.zeros((cols, rows))))
+            results.append((np.zeros((cols, rows)),)*3)
 
-    time_blocks = 1  # Daily blocks
-        # Stack the FRP and EBB results from all blocks along a new time dimension
+    # Stack the FRP and EBB results from all blocks along a new time dimension
     frp_avg_reshaped_dc4 = np.stack([res[0] for res in results], axis=0)
     ebb_tot_reshaped_dc4 = np.stack([res[1] for res in results], axis=0)
     cldfrac_avg_reshaped_dc4 = np.stack([res[2] for res in results], axis=0)
-
+    
+    #print('Avg four blocks: ebb_rate, FRP, CLDFRAC:',ebb_tot_reshaped_dc4[:,556,955], frp_avg_reshaped_dc4[:,556,955],cldfrac_avg_reshaped_dc4[:,556,955])
+    #print('Avg four blocks: ebb_rate, FRP, CLDFRAC:',ebb_tot_reshaped_dc4[:,895,387], frp_avg_reshaped_dc4[:,895,387],cldfrac_avg_reshaped_dc4[:,895,387])
     return(frp_avg_reshaped_dc4, ebb_tot_reshaped_dc4, cldfrac_avg_reshaped_dc4)
 
 def estimate_fire_duration(intp_avail_hours, intp_dir, fcst_dates, current_day, cols, rows, rave_to_intp):
@@ -304,7 +318,8 @@ def prepare_arrays(frp_avg_reshaped, ebb_tot_reshaped, fire_dur,  xarr_hwp, xarr
     print("hwp:", hwp_input.shape,type(hwp_input))
     print("fire_dur:", fire_dur_input.shape, type(fire_dur_input))
     print("cldfrac:", cldfrac_input.shape, type(cldfrac_input))
-
+    #print('Avg when preparing array: ebb_rate, FRP, CLDFRAC, HWP, FIRE_DUR, TOTPREC:',ebb_tot_input[:,556,955], frp_avg_input[:,556,955],cldfrac_input[:,556,955],hwp_input[:,556,955],fire_dur_input[:,556,955],totprcp_input[:,556,955])
+    #print('Avg when preparing array: ebb_rate, FRP, CLDFRAC, HWP, FIRE_DUR, TOTPREC:',ebb_tot_input[:,895,387], frp_avg_input[:,895,387],cldfrac_input[:,895,387],hwp_input[:,556,955],fire_dur_input[:,895,387],totprcp_input[:,642,1073])
     #da = xr.DataArray(
     #totprcp_input,
     #dims=["time", "lat", "lon"],
@@ -352,10 +367,12 @@ def produce_emiss_file(frp_avg_input,ebb_tot_input,totprcp_input,hwp_input,fire_
     ebb_tot_reshaped = ebb_tot_reshaped * mask
     # Produce emiss file
     file_path = os.path.join(intp_dir, f'SMOKE_RRFS_data_{current_day}00.nc')
-    
+    #print('Avg when out: ebb_rate, FRP, CLDFRAC, HWP, FIRE_DUR, TOTPREC:',ebb_tot_reshaped[:,556,955], frp_avg_reshaped[:,556,955],filtered_clfrac[:,556,955],filtered_hwp[:,556,955],fire_age[:,556,955],filtered_prcp[:,556,955])
+    #print('Avg when out: ebb_rate, FRP, CLDFRAC, HWP, FIRE_DUR, TOTPREC:',ebb_tot_reshaped[:,895,387], frp_avg_reshaped[:,895,387],filtered_clfrac[:,895,387],filtered_hwp[:,895,387],fire_age[:,895,387],filtered_prcp[:,642,1073])
     try:
         with Dataset(file_path, 'w') as fout:
           i_tools.create_emiss_file(fout, cols, rows)
+
           i_tools.Store_latlon_by_Level(fout, 'geolat', tgt_latt, 'cell center latitude', 'degrees_north', '2D', '-9999.f', '1.f')
           i_tools.Store_latlon_by_Level(fout, 'geolon', tgt_lont, 'cell center longitude', 'degrees_east', '2D', '-9999.f', '1.f')
 

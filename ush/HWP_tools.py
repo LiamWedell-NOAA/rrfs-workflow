@@ -130,6 +130,8 @@ def process_hwp_24(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp
                             tprcp_values = nc.totprcp_ave.values.ravel()
                             totprcp += np.where(tprcp_values > 0, tprcp_values, 0)
                             hwp_ave.append(hwp_values)
+                            #print('hrly HWP, Prepe:', nc.rrfs_hwp_ave[556,955],nc.totprcp_ave[556,955])
+                            #print('hrly HWP, Prepe:', nc.rrfs_hwp_ave[:,895,387].values,nc.totprcp_ave[:,642,1073].values) 
                             print(f'Restart file processed for: {cycle}')
                         else:
                             print(f'Missing variables {var1} or {var2} in file: {file_path}')
@@ -151,7 +153,7 @@ def process_hwp_24(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp
     xarr_hwp = xr.DataArray(hwp_ave_arr)
     xarr_totprcp = xr.DataArray(totprcp_ave_arr)
 
-    print('HWP 24 avg', hwp_ave_arr.max(), xarr_hwp.max())
+    #print('HWP 24 avg', hwp_ave_arr.max(), xarr_hwp.max(),xarr_hwp[556,955],xarr_totprcp[556,955],hwp_ave_arr[556,955])
     return(hwp_ave_arr, xarr_hwp, totprcp_ave_arr, xarr_totprcp)
 
 def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_intp):
@@ -200,6 +202,8 @@ def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_int
             valid_counts = np.where(data_count_blocks[block] > 0, data_count_blocks[block], 1)
             hwp_ave_arr = (hwp_sum.reshape(cols, rows) / valid_counts)  # Use broadcasting safely here
             results.append((hwp_ave_arr, xr.DataArray(hwp_ave_arr, dims=['lat', 'lon'])))
+            #print('hrly HWP:', hwp_ave_arr[556,955])
+            #print('hrly HWP:', hwp_ave_arr[895,387]) 
         else:
             #results.append(np.zeros(cols, rows), xr.DataArray(np.zeros(cols, rows), dims=['lat', 'lon']))
             hwp_ave_arr = np.zeros((cols, rows))
@@ -207,6 +211,8 @@ def process_hwp_dc4(fcst_dates, hourly_hwpdir, cols, rows, intp_dir, rave_to_int
     hwp_ave_arr_dc4 = np.stack([res[0] for res in results], axis=0)
 
     xarr_hwp_dc4  = xr.DataArray(hwp_ave_arr_dc4)
+    #print(hwp_ave_arr_dc4[:,556,955],xarr_hwp_dc4[:,556,955]) 
+    #print(hwp_ave_arr_dc4[:,895,387],xarr_hwp_dc4[:,642,1073]) 
     # Return values depending on the selected ebb_dc option
     return(hwp_ave_arr_dc4, xarr_hwp_dc4)  # A list with four elements for each 6-hourly block
 
